@@ -1,0 +1,794 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "YaayDoom API",
+        "description": "Documentation OpenAPI strictement alignée sur les endpoints utilisés par le frontend, triée par profil",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://127.0.0.1:8000",
+            "description": "Serveur local"
+        },
+        {
+            "url": "/api"
+        }
+    ],
+    "paths": {
+        "/api/auth/register": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Inscription utilisateur",
+                "operationId": "119f45032d3afea4e5371c207ab0426c",
+                "responses": {
+                    "201": {
+                        "description": "Compte créé"
+                    }
+                }
+            }
+        },
+        "/api/auth/login": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Connexion utilisateur",
+                "operationId": "c89bcfcd1f1f9f989779b60c2b728a1c",
+                "responses": {
+                    "200": {
+                        "description": "Connexion réussie"
+                    }
+                }
+            }
+        },
+        "/api/auth/logout": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Déconnexion",
+                "operationId": "42b221d4f1f429ee132556b2eb28f7aa",
+                "responses": {
+                    "200": {
+                        "description": "Déconnecté"
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            }
+        },
+        "/api/auth/me": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Utilisateur connecté",
+                "operationId": "a14eddccabaeebebd3c1e0d1839c8970",
+                "responses": {
+                    "200": {
+                        "description": "Profil"
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            },
+            "patch": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Mise à jour profil connecté",
+                "operationId": "2fd092e92aeae2e2b55e28eee685675e",
+                "responses": {
+                    "200": {
+                        "description": "Profil mis à jour"
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            }
+        },
+        "/api/auth/change-password": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Changer mot de passe",
+                "operationId": "41a4de67bb8dba3efcdd101dc102d3bf",
+                "responses": {
+                    "200": {
+                        "description": "Mot de passe modifié"
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/users": {
+            "get": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Liste utilisateurs (admin)",
+                "operationId": "d8c47b5c6a4aca71c3c2e44e02456497",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/stats": {
+            "get": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Statistiques admin",
+                "operationId": "c56e2810e0b0e3a989f75a3846a655bb",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/professionnels/pending": {
+            "get": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Professionnels en attente",
+                "operationId": "14c9ff49174b7f5f4d9f2ceb1c4badbb",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/professionnels/{user}/approve": {
+            "post": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Approuver professionnel",
+                "operationId": "1c81038350c3f5c16a8ed46ec1cc930c",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Approuvé"
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/professionnels/{user}/reject": {
+            "post": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Rejeter professionnel",
+                "operationId": "ca0bb1d30b5b69f0bdb40090f1aeb06a",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Rejeté"
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/users/{user}/role": {
+            "patch": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Changer rôle utilisateur",
+                "operationId": "315699ad016bd607efc34f6857ac4b4e",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Rôle modifié"
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/users/{user}/status": {
+            "patch": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Changer statut utilisateur",
+                "operationId": "b80f6688950e23460be746d6a31826bd",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Statut modifié"
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            }
+        },
+        "/api/users/{user}": {
+            "get": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Afficher user",
+                "operationId": "10f989166097b30c13de2f9529d3b38c",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Mettre à jour user",
+                "operationId": "e65b1dda7d62831b11ffb69cd39c716f",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Modifié"
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Supprimer user",
+                "operationId": "5b3871a272eb9213ad7b620141ece3d7",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Supprimé"
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            }
+        },
+        "/api/grossesses": {
+            "get": {
+                "tags": [
+                    "Maman",
+                    "Professionnel"
+                ],
+                "summary": "Liste grossesses",
+                "operationId": "ad2253fc6eeff6aaf668c5e95d03bd1e",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Maman",
+                    "Professionnel"
+                ],
+                "summary": "Créer grossesse",
+                "operationId": "9440193d4ff59b9dbf70f01958bf48bc",
+                "responses": {
+                    "201": {
+                        "description": "Créé"
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            }
+        },
+        "/api/grossesses/{grossess}": {
+            "get": {
+                "tags": [
+                    "Maman",
+                    "Professionnel"
+                ],
+                "summary": "Afficher grossesse",
+                "operationId": "76a4925cac300de6de7d9c4e275143bf",
+                "parameters": [
+                    {
+                        "name": "grossess",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Maman",
+                    "Professionnel"
+                ],
+                "summary": "Mettre à jour grossesse",
+                "operationId": "f83a3a40e06d5b8e1eeef97c5731d30c",
+                "parameters": [
+                    {
+                        "name": "grossess",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Modifié"
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            },
+            "patch": {
+                "tags": [
+                    "Maman",
+                    "Professionnel"
+                ],
+                "summary": "Mettre à jour partiellement grossesse",
+                "operationId": "46a82d00cfbe0f8379b56e67cbf3b74f",
+                "parameters": [
+                    {
+                        "name": "grossess",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Modifié"
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            }
+        },
+        "/api/bebes": {
+            "get": {
+                "tags": [
+                    "Maman",
+                    "Professionnel"
+                ],
+                "summary": "Liste bébés",
+                "operationId": "925bc21dbe819a510320145df17ab2a4",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Maman",
+                    "Professionnel"
+                ],
+                "summary": "Créer bébé",
+                "operationId": "75e35727187e984458c32baefd278906",
+                "responses": {
+                    "201": {
+                        "description": "Créé"
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            }
+        },
+        "/api/consultations": {
+            "get": {
+                "tags": [
+                    "Professionnel"
+                ],
+                "summary": "Liste consultations",
+                "operationId": "7b5b87faa0386103a87d31aa61f90939",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Professionnel"
+                ],
+                "summary": "Créer consultation",
+                "operationId": "609b39305092b28f45bac34245698aec",
+                "responses": {
+                    "201": {
+                        "description": "Créé"
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            }
+        },
+        "/api/consultations/{consultation}": {
+            "get": {
+                "tags": [
+                    "Professionnel"
+                ],
+                "summary": "Afficher consultation",
+                "operationId": "5e6bfeb721b7674d411c53733fe31463",
+                "parameters": [
+                    {
+                        "name": "consultation",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            },
+            "patch": {
+                "tags": [
+                    "Professionnel"
+                ],
+                "summary": "Mettre à jour consultation",
+                "operationId": "566185320109b50ac9b785527e896a63",
+                "parameters": [
+                    {
+                        "name": "consultation",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Modifié"
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            }
+        },
+        "/api/vaccinations": {
+            "get": {
+                "tags": [
+                    "Maman",
+                    "Professionnel"
+                ],
+                "summary": "Liste vaccinations",
+                "operationId": "d0790e4093738da8cddef97fbe03a4b3",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Maman",
+                    "Professionnel"
+                ],
+                "summary": "Créer vaccination",
+                "operationId": "c8e0feb2a5fe5ae309444618e387b16c",
+                "responses": {
+                    "201": {
+                        "description": "Créé"
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            }
+        },
+        "/api/vaccinations/{vaccination}": {
+            "patch": {
+                "tags": [
+                    "Maman",
+                    "Professionnel"
+                ],
+                "summary": "Mettre à jour vaccination",
+                "operationId": "afe53db655419f1314a0a3dd9de97cff",
+                "parameters": [
+                    {
+                        "name": "vaccination",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Modifié"
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            }
+        },
+        "/api/rendez-vous": {
+            "get": {
+                "tags": [
+                    "Maman"
+                ],
+                "summary": "Liste rendez-vous",
+                "operationId": "0622b96c4bf23983de0471f45a58e1f1",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            }
+        },
+        "/api/scans/resolve": {
+            "post": {
+                "tags": [
+                    "Professionnel"
+                ],
+                "summary": "Résoudre un code QR en dossier patient",
+                "operationId": "2fdc7d37926e16994bccfe291313ea02",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "qr_code"
+                                ],
+                                "properties": {
+                                    "qr_code": {
+                                        "type": "string",
+                                        "example": "p-1"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Patient trouvé"
+                    },
+                    "404": {
+                        "description": "Patient non trouvé"
+                    },
+                    "422": {
+                        "description": "Erreur de validation"
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "Bearer": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT",
+                "description": "Entrez le token au format: Bearer {token}"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Auth"
+        },
+        {
+            "name": "Admin",
+            "description": "Endpoints de gestion administrateur"
+        },
+        {
+            "name": "Maman",
+            "description": "Endpoints pour le parcours maman"
+        },
+        {
+            "name": "Professionnel",
+            "description": "Endpoints pour le parcours professionnel de santé"
+        }
+    ],
+    "security": [
+        {
+            "Bearer": []
+        }
+    ]
+}

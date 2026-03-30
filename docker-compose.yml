@@ -1,0 +1,15 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: yaaydoom-backend
+    env_file:
+      - .env
+    environment:
+      APP_URL: http://localhost:8000
+      L5_SWAGGER_CONST_HOST: http://localhost:8000
+      RUN_MIGRATIONS: "false"
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
