@@ -357,6 +357,24 @@ Notes:
 - `APP_URL` et `L5_SWAGGER_CONST_HOST` doivent correspondre a l'URL publique du service
 - si tu relies le backend a PostgreSQL, verifie que `DB_URL` pointe vers la bonne instance
 
+### Pousser sur Docker Hub
+
+Avec ton identifiant `lingueredev`, tu peux publier l'image comme ceci:
+
+```bash
+docker login
+docker build -t lingueredev/yaaydoom-backend:latest .
+docker push lingueredev/yaaydoom-backend:latest
+```
+
+### Lancer l'image publiee
+
+Le fichier `docker-compose.prod.yml` pointe deja vers l'image Docker Hub:
+
+```bash
+docker compose -f docker-compose.prod.yml up -d
+```
+
 ## Licence
 
 Ce projet est distribue sous licence MIT.
