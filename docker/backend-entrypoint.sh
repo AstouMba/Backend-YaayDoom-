@@ -8,6 +8,14 @@ echo "Starting YaayDoom backend container"
 # They can reference dev-only packages and break a production image built with --no-dev.
 rm -f bootstrap/cache/*.php
 
+mkdir -p \
+  storage/framework/cache/data \
+  storage/framework/sessions \
+  storage/framework/testing \
+  storage/framework/views \
+  storage/logs \
+  bootstrap/cache
+
 if [ -z "$APP_KEY" ]; then
   echo "APP_KEY is not set. Provide it through the container environment before starting."
   exit 1
