@@ -4,18 +4,18 @@ set -e
 
 echo "Starting YaayDoom backend container"
 
-if [ -z "$APP_KEY" ]; then
-  echo "APP_KEY not set, generating one"
-  php artisan key:generate --force --ansi || true
-fi
+# Remove any cached provider manifests copied from the repository.
+# They can reference dev-only packages and break a production image built with --no-dev.
+rm -f bootstrap/cache/*.php
 
-php artisan config:clear || true
-php artisan route:clear || true
-php artisan cache:clear || true
+if [ -z "$APP_KEY" ]; then
+  echo "APP_KEY is not set. Provide it through the container environment before starting."
+  exit 1
+fi
 
 if [ "${RUN_MIGRATIONS:-false}" = "true" ]; then
   echo "Running migrations"
-  php artisan migrate --force || true
+  php artisan migrate --force
 fi
 
 exec "$@"

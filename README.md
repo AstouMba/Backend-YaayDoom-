@@ -1,59 +1,362 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# YaayDoom Backend
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Backend Laravel de l'application YaayDoom, centre sur la gestion des parcours de sante pour les roles `maman`, `professionnel` et `admin`.
 
-## About Laravel
+Le projet expose une API securisee par token via Laravel Passport, avec documentation OpenAPI/Swagger integree et une organisation par features metier.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Sommaire
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- [Stack technique](#stack-technique)
+- [Fonctionnalites](#fonctionnalites)
+- [Architecture du projet](#architecture-du-projet)
+- [Prerequis](#prerequis)
+- [Installation](#installation)
+- [Configuration `.env`](#configuration-env)
+- [Comptes de demo](#comptes-de-demo)
+- [Lancer le projet](#lancer-le-projet)
+- [API](#api)
+- [Swagger](#swagger)
+- [Base de donnees et seeders](#base-de-donnees-et-seeders)
+- [Tests](#tests)
+- [Commandes utiles](#commandes-utiles)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Stack technique
 
-## Learning Laravel
+- Laravel 12
+- PHP 8.2+
+- Laravel Passport pour l'authentification par bearer token
+- L5 Swagger pour la documentation OpenAPI
+- PostgreSQL en base par defaut
+- Vite et Tailwind CSS pour les assets frontend si necessaire
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## Fonctionnalites
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+- Authentification:
+  - inscription
+  - connexion
+  - deconnexion
+  - consultation du profil connecte
+  - mise a jour du profil
+  - changement de mot de passe
+- Administration:
+  - liste des utilisateurs
+  - statistiques
+  - validation / rejet des professionnels
+  - changement de role
+  - changement de statut
+- Metier:
+  - grossesses
+  - bebes
+  - consultations
+  - vaccinations
+  - rendez-vous
+  - cartes
+  - scans
 
-## Laravel Sponsors
+## Architecture du projet
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Le code suit une organisation par domaine fonctionnel dans `app/Features/`.
 
-### Premium Partners
+Exemples:
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+- `app/Features/Auth` pour l'authentification
+- `app/Features/Admin` pour les usages administrateur
+- `app/Features/Grossesse`, `Bebe`, `Vaccination`, `RendezVous`, `Consultation`, `Carte`, `Scan` pour les modules metier
+- `app/Http/Middleware/RoleMiddleware.php` pour la gestion des roles
+- `app/Swagger/OpenApiSpec.php` pour la documentation Swagger
 
-## Contributing
+Le point de montage principal de l'application se trouve dans `bootstrap/app.php`, avec un alias de middleware `role`.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Prerequis
 
-## Code of Conduct
+- PHP 8.2 ou superieur
+- Composer
+- Node.js et npm
+- PostgreSQL
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Installation
 
-## Security Vulnerabilities
+1. Installer les dependances PHP:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+composer install
+```
 
-## License
+2. Creer le fichier d'environnement:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+cp .env.example .env
+```
+
+3. Generer la cle d'application:
+
+```bash
+php artisan key:generate
+```
+
+4. Configurer la base de donnees dans `.env`:
+
+- `DB_CONNECTION=pgsql`
+- `DB_URL=postgresql://username:password@host/database?sslmode=require`
+- `DB_SSLMODE=require`
+
+5. Lancer les migrations et les seeders:
+
+```bash
+php artisan migrate --seed
+```
+
+6. Initialiser Passport si tes cles OAuth ne sont pas deja presentes dans l'environnement:
+
+```bash
+php artisan passport:install
+```
+
+7. Installer les dependances frontend si necessaire:
+
+```bash
+npm install
+```
+
+## Configuration `.env`
+
+Les variables les plus importantes pour ce backend sont:
+
+```env
+APP_NAME=YaayDoom
+APP_URL=http://127.0.0.1:8000
+APP_DEBUG=true
+
+DB_CONNECTION=pgsql
+DB_URL=postgresql://username:password@host/database?sslmode=require
+DB_SSLMODE=require
+
+CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+
+L5_SWAGGER_GENERATE_ALWAYS=true
+L5_SWAGGER_BASE_PATH=/api
+L5_SWAGGER_CONST_HOST=http://127.0.0.1:8000
+L5_SWAGGER_UI_PERSIST_AUTHORIZATION=true
+
+SESSION_DRIVER=database
+QUEUE_CONNECTION=database
+CACHE_STORE=database
+```
+
+Notes utiles:
+
+- ajuste `CORS_ALLOWED_ORIGINS` selon l'URL du frontend
+- ajuste `L5_SWAGGER_CONST_HOST` si l'API tourne sur un autre host ou port
+- `L5_SWAGGER_GENERATE_ALWAYS=true` force la regeneration de la spec Swagger a chaque execution
+
+## Comptes de demo
+
+Les seeders ajoutent des comptes de demonstration directement utilisables.
+
+| Role | Email | Mot de passe |
+| --- | --- | --- |
+| Admin | `admin@demo.com` | `demo1234` |
+| Maman | `maman@demo.com` | `demo1234` |
+| Professionnel | `pro@demo.com` | `demo1234` |
+| Professionnel en attente | `pro.enattente@demo.com` | `demo1234` |
+
+Le compte `pro.enattente@demo.com` est cree avec `is_validated = false`.
+
+## Lancer le projet
+
+### Mode developpement
+
+Le script suivant lance le serveur Laravel, la queue, les logs et Vite en parallele:
+
+```bash
+composer run dev
+```
+
+### Mode manuel
+
+Tu peux aussi demarrer chaque service separement:
+
+```bash
+php artisan serve
+php artisan queue:listen --tries=1 --timeout=0
+php artisan pail --timeout=0
+npm run dev
+```
+
+## API
+
+L'API est exposee sous le prefixe `/api`.
+
+### Authentification
+
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+- `POST /api/auth/logout`
+- `GET /api/auth/me`
+- `PATCH /api/auth/me`
+- `POST /api/auth/change-password`
+
+### Administration
+
+Accessibles uniquement pour les utilisateurs ayant le role `admin`.
+
+- `GET /api/admin/users`
+- `GET /api/admin/stats`
+- `GET /api/admin/professionnels/pending`
+- `POST /api/admin/professionnels/{user}/approve`
+- `POST /api/admin/professionnels/{user}/reject`
+- `PATCH /api/admin/users/{user}/role`
+- `PATCH /api/admin/users/{user}/status`
+- `GET /api/users/{user}`
+- `PUT /api/users/{user}`
+- `DELETE /api/users/{user}`
+
+### Parcours metier
+
+Toutes les routes suivantes sont protegees par `auth:api`.
+
+- `grossesses`
+  - `GET /api/grossesses`
+  - `GET /api/grossesses/{grossesse}`
+  - `POST /api/grossesses`
+  - `PUT /api/grossesses/{grossesse}`
+  - `PATCH /api/grossesses/{grossesse}`
+  - `DELETE /api/grossesses/{grossesse}`
+- `bebes`
+  - `GET /api/bebes`
+  - `GET /api/bebes/{bebe}`
+  - `POST /api/bebes`
+  - `PUT /api/bebes/{bebe}`
+  - `PATCH /api/bebes/{bebe}`
+  - `DELETE /api/bebes/{bebe}`
+- `vaccinations`
+  - `GET /api/vaccinations`
+  - `GET /api/vaccinations/{vaccination}`
+  - `POST /api/vaccinations`
+  - `PUT /api/vaccinations/{vaccination}`
+  - `PATCH /api/vaccinations/{vaccination}`
+  - `DELETE /api/vaccinations/{vaccination}`
+- `rendez-vous`
+  - `GET /api/rendez-vous`
+  - `GET /api/rendez-vous/{rendezVous}`
+  - `POST /api/rendez-vous`
+  - `PUT /api/rendez-vous/{rendezVous}`
+  - `PATCH /api/rendez-vous/{rendezVous}`
+  - `DELETE /api/rendez-vous/{rendezVous}`
+- `cartes`
+  - `GET /api/cartes`
+  - `GET /api/cartes/{carte}`
+  - `POST /api/cartes`
+  - `PUT /api/cartes/{carte}`
+  - `PATCH /api/cartes/{carte}`
+  - `DELETE /api/cartes/{carte}`
+- `consultations`
+  - `GET /api/consultations`
+  - `GET /api/consultations/{consultation}`
+  - `POST /api/consultations`
+  - `PUT /api/consultations/{consultation}`
+  - `PATCH /api/consultations/{consultation}`
+  - `DELETE /api/consultations/{consultation}`
+- `scans`
+  - `GET /api/scans`
+  - `POST /api/scans/resolve`
+  - `GET /api/scans/{scan}`
+  - `DELETE /api/scans/{scan}`
+
+### Roles et securite
+
+- l'authentification API utilise le guard `passport`
+- le middleware `role` est declare dans `bootstrap/app.php`
+- le format attendu pour les appels proteges est `Authorization: Bearer <token>`
+- health check disponible sur `GET /up`
+
+## Swagger
+
+La documentation API est generee avec L5 Swagger.
+
+- URL locale: `http://127.0.0.1:8000/api/documentation`
+- spec JSON: `api-docs.json`
+
+Les annotations OpenAPI se trouvent dans `app/Swagger/OpenApiSpec.php`.
+
+## Base de donnees et seeders
+
+Tables et entites principales:
+
+- `users`
+- `grossesses`
+- `bebes`
+- `consultations`
+- `vaccinations`
+- `rendez_vous`
+- `cartes`
+- `scans`
+- tables OAuth de Passport
+
+Le seeder principal `DatabaseSeeder` charge:
+
+1. `AdminSeeder`
+2. `MamanSeeder`
+3. `ProfessionnelSeeder`
+4. `GrossesseSeeder`
+5. `BebeSeeder`
+6. `ConsultationSeeder`
+7. `RendezVousSeeder`
+8. `CarteSeeder`
+9. `VaccinationSeeder`
+10. `ScanSeeder`
+
+## Tests
+
+Lance la suite de tests avec:
+
+```bash
+composer run test
+```
+
+## Commandes utiles
+
+- `php artisan migrate:fresh --seed` pour repartir de zero avec les donnees de demo
+- `php artisan tinker` pour explorer les modeles et les donnees
+- `php artisan pail` pour suivre les logs Laravel
+- `php artisan up` et `php artisan down` pour la maintenance
+- `php artisan route:list` pour verifier les routes exposees
+- `npm run build` pour produire les assets frontend de production
+
+## Docker
+
+Le backend peut etre embarque dans une image Docker de production.
+
+### Build de l'image
+
+```bash
+docker build -t yaaydoom-backend:latest .
+```
+
+### Lancement du conteneur
+
+Avant de demarrer, assure-toi de fournir une `APP_KEY` valide dans ton `.env` ou via les variables d'environnement du conteneur.
+
+```bash
+docker run -d \
+  --name yaaydoom-backend \
+  --env-file .env \
+  -p 8000:8000 \
+  yaaydoom-backend:latest
+```
+
+### Avec Docker Compose
+
+```bash
+docker compose up -d --build
+```
+
+Notes:
+
+- `RUN_MIGRATIONS=true` lance les migrations au demarrage du conteneur
+- `APP_URL` et `L5_SWAGGER_CONST_HOST` doivent correspondre a l'URL publique du service
+- si tu relies le backend a PostgreSQL, verifie que `DB_URL` pointe vers la bonne instance
+
+## Licence
+
+Ce projet est distribue sous licence MIT.
