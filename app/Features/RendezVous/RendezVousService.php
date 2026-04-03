@@ -2,10 +2,12 @@
 
 namespace App\Features\RendezVous;
 
+use App\Models\Grossesse;
 use App\Models\RendezVous;
+use App\Services\Service;
 use Illuminate\Database\Eloquent\Collection;
 
-class RendezVousService
+class RendezVousService extends Service
 {
     /**
      * Récupérer tous les rendez-vous
@@ -18,9 +20,15 @@ class RendezVousService
     /**
      * Récupérer un rendez-vous par ID
      */
-    public function get(int $id): ?RendezVous
+    public function get(string $id): ?RendezVous
     {
-        return RendezVous::find($id);
+        $rendezVous = RendezVous::find($id);
+
+        if (!$rendezVous) {
+            $this->notFound('rendez_vous_not_found');
+        }
+
+        return $rendezVous;
     }
 
     /**
@@ -28,6 +36,14 @@ class RendezVousService
      */
     public function create(array $data): RendezVous
     {
+        $grossesse = Grossesse::find($data['grossesse_id']);
+        if (!$grossesse) {
+            $this->notFound('grossesse_not_found');
+        }
+
+        $data['maman_id'] = $grossesse->maman_id;
+        $data['statut'] = $data['statut'] ?? 'prévu';
+
         return RendezVous::create($data);
     }
 
@@ -39,7 +55,7 @@ class RendezVousService
         $rendezVous = RendezVous::find($id);
         
         if (!$rendezVous) {
-            return null;
+            $this->notFound('rendez_vous_not_found');
         }
 
         $rendezVous->update($data);
@@ -55,7 +71,7 @@ class RendezVousService
         $rendezVous = RendezVous::find($id);
         
         if (!$rendezVous) {
-            return false;
+            $this->notFound('rendez_vous_not_found');
         }
 
         return $rendezVous->delete();

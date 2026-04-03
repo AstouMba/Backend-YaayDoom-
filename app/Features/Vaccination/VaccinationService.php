@@ -3,9 +3,10 @@
 namespace App\Features\Vaccination;
 
 use App\Models\Vaccination;
+use App\Services\Service;
 use Illuminate\Database\Eloquent\Collection;
 
-class VaccinationService
+class VaccinationService extends Service
 {
     /**
      * Récupérer toutes les vaccinations
@@ -18,9 +19,15 @@ class VaccinationService
     /**
      * Récupérer une vaccination par ID
      */
-    public function get(int $id): ?Vaccination
+    public function get(string $id): ?Vaccination
     {
-        return Vaccination::find($id);
+        $vaccination = Vaccination::find($id);
+
+        if (!$vaccination) {
+            $this->notFound('vaccination_not_found');
+        }
+
+        return $vaccination;
     }
 
     /**
@@ -39,7 +46,7 @@ class VaccinationService
         $vaccination = Vaccination::find($id);
         
         if (!$vaccination) {
-            return null;
+            $this->notFound('vaccination_not_found');
         }
 
         $vaccination->update($data);
@@ -55,7 +62,7 @@ class VaccinationService
         $vaccination = Vaccination::find($id);
         
         if (!$vaccination) {
-            return false;
+            $this->notFound('vaccination_not_found');
         }
 
         return $vaccination->delete();

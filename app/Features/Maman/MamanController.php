@@ -29,10 +29,6 @@ class MamanController extends Controller
     {
         $maman = $this->mamanService->get($id);
 
-        if (!$maman) {
-            return response()->json(['message' => 'Maman not found'], 404);
-        }
-
         return response()->json($maman);
     }
 
@@ -41,15 +37,7 @@ class MamanController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'phone' => 'nullable|string|max:30|unique:users,phone',
-            'password' => 'required|string|min:8',
-            'status' => 'sometimes|string|in:actif,inactif',
-        ]);
-
-        $maman = $this->mamanService->create($validated);
+        $maman = $this->mamanService->create(MamanValidator::store($request->all()));
 
         return response()->json($maman, 201);
     }
@@ -59,19 +47,7 @@ class MamanController extends Controller
      */
     public function update(Request $request, string $id): JsonResponse
     {
-        $validated = $request->validate([
-            'name' => 'sometimes|string|max:255',
-            'email' => 'sometimes|email|unique:users,email,' . $id,
-            'phone' => 'sometimes|nullable|string|max:30|unique:users,phone,' . $id,
-            'password' => 'sometimes|string|min:8',
-            'status' => 'sometimes|string|in:actif,inactif',
-        ]);
-
-        $maman = $this->mamanService->update($id, $validated);
-
-        if (!$maman) {
-            return response()->json(['message' => 'Maman not found'], 404);
-        }
+        $maman = $this->mamanService->update($id, MamanValidator::update($request->all(), $id));
 
         return response()->json($maman);
     }
@@ -81,11 +57,7 @@ class MamanController extends Controller
      */
     public function destroy(string $id): JsonResponse
     {
-        $deleted = $this->mamanService->delete($id);
-
-        if (!$deleted) {
-            return response()->json(['message' => 'Maman not found'], 404);
-        }
+        $this->mamanService->delete($id);
 
         return response()->json(['message' => 'Maman deleted successfully']);
     }

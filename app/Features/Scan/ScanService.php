@@ -7,10 +7,11 @@ use App\Models\Carte;
 use App\Models\Grossesse;
 use App\Models\Scan;
 use App\Models\User;
+use App\Services\Service;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 
-class ScanService
+class ScanService extends Service
 {
     /**
      * Récupérer tous les scans
@@ -23,9 +24,15 @@ class ScanService
     /**
      * Récupérer un scan par ID
      */
-    public function get(int $id): ?Scan
+    public function get(string $id): ?Scan
     {
-        return Scan::find($id);
+        $scan = Scan::find($id);
+
+        if (!$scan) {
+            $this->notFound('scan_not_found');
+        }
+
+        return $scan;
     }
 
     /**
@@ -44,7 +51,7 @@ class ScanService
         $scan = Scan::find($id);
         
         if (!$scan) {
-            return null;
+            $this->notFound('scan_not_found');
         }
 
         $scan->update($data);
@@ -60,7 +67,7 @@ class ScanService
         $scan = Scan::find($id);
         
         if (!$scan) {
-            return false;
+            $this->notFound('scan_not_found');
         }
 
         return $scan->delete();
@@ -71,11 +78,24 @@ class ScanService
      *
      * @return array<string, mixed>|null
      */
-    public function resolveFromQrCode(string $qrCode, ?int $professionnelId = null): ?array
+    public function resolveFromQrCode(string $qrCode, ?string $professionnelId = null): ?array
     {
         $qrCode = trim($qrCode);
         if ($qrCode === '') {
-            return null;
+            $this->unprocessable('qr_code_required', [
+                'qr_code' => ['required'],
+            ]);
+        }
+
+        $user = User::find($qrCode);
+        if ($user) {
+            return $this->formatMamanPayload($user, $qrCode);
+        }
+
+        $bebeById = Bebe::with('maman')->find($qrCode);
+        if ($bebeById) {
+            $this->traceScan($bebeById->id, $qrCode, $professionnelId);
+            return $this->formatBebePayload($bebeById, $qrCode);
         }
 
         $bebe = $this->resolveBebeFromQr($qrCode);
@@ -86,7 +106,7 @@ class ScanService
 
         $maman = $this->resolveMamanFromQr($qrCode);
         if (!$maman) {
-            return null;
+            $this->notFound('patient_not_found');
         }
 
         return $this->formatMamanPayload($maman, $qrCode);
@@ -198,14 +218,14 @@ class ScanService
         return implode(' ', array_slice($parts, -2));
     }
 
-    private function traceScan(int $bebeId, string $qrCode, ?int $professionnelId = null): void
+    private function traceScan(string $bebeId, string $qrCode, ?string $professionnelId = null): void
     {
         Scan::create([
             'bebe_id' => $bebeId,
             'type_scan' => 'qr_code',
             'date_scan' => Carbon::today()->toDateString(),
             'resultat' => $qrCode,
-            'notes' => $professionnelId ? 'Scan par professionnel #' . $professionnelId : null,
+            'notes' => $professionnelId ? 'Scan par professionnel ' . $professionnelId : null,
         ]);
     }
 
@@ -251,29 +271,18 @@ class ScanService
     private function formatMamanPayload(User $maman, string $qrCode): array
     {
         $grossesse = Grossesse::where('maman_id', $maman->id)->latest('id')->first();
-        $semaines = 0;
-
-        if ($grossesse?->date_debut) {
-            $semaines = (int) max(0, Carbon::parse($grossesse->date_debut)->diffInWeeks(Carbon::now()));
-        }
 
         return [
-            'source' => 'scan',
-            'qr_code' => $qrCode,
             'type' => 'grossesse',
-            'id' => 'm-' . $maman->id,
-            'mamanId' => $maman->id,
-            'nomMaman' => $maman->name,
-            'telephone' => $maman->phone,
-            'email' => $maman->email,
+            'patient' => [
+                'id' => $maman->id,
+                'nom' => $maman->name,
+                'telephone' => $maman->phone,
+            ],
             'grossesse' => $grossesse ? [
-                'id' => 'g-' . $grossesse->id,
-                'mamanId' => $grossesse->maman_id,
-                'mamanNom' => $maman->name,
-                'semaineGrossesse' => $semaines,
-                'statut' => strtoupper($grossesse->statut === 'en_cours' ? 'VALIDEE' : $grossesse->statut),
-                'dateDernieresRegles' => optional($grossesse->date_debut)->format('Y-m-d'),
-                'datePresumeAccouchement' => optional($grossesse->date_fin_prevue)->format('Y-m-d'),
+                'id' => $grossesse->id,
+                'maman_id' => $grossesse->maman_id,
+                'statut' => $grossesse->statut === 'en_cours' ? 'validee' : $grossesse->statut,
             ] : null,
         ];
     }

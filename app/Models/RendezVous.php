@@ -30,10 +30,14 @@ class RendezVous extends Model
     protected $fillable = [
         'maman_id',
         'professionnel_id',
+        'grossesse_id',
         'date',
         'heure',
+        'type',
         'motif',
+        'lieu',
         'statut',
+        'notes',
     ];
 
     /**
@@ -45,6 +49,29 @@ class RendezVous extends Model
     {
         return [
             'date' => 'date',
+        ];
+    }
+
+    /**
+     * Format contractuel exposé au frontend.
+     *
+     * @return array<string, mixed>
+     */
+    public function toContractArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'maman_id' => $this->maman_id,
+            'grossesse_id' => $this->grossesse_id,
+            'type' => $this->type,
+            'motif' => $this->motif,
+            'date' => optional($this->date)->format('Y-m-d'),
+            'heure' => $this->heure,
+            'professionnel_id' => $this->professionnel_id,
+            'professionnel' => $this->professionnel?->name,
+            'lieu' => $this->lieu,
+            'statut' => $this->statut,
+            'notes' => $this->notes,
         ];
     }
 
@@ -62,5 +89,13 @@ class RendezVous extends Model
     public function professionnel(): BelongsTo
     {
         return $this->belongsTo(User::class, 'professionnel_id');
+    }
+
+    /**
+     * Get the grossesse that owns the rendez-vous.
+     */
+    public function grossesse(): BelongsTo
+    {
+        return $this->belongsTo(Grossesse::class, 'grossesse_id');
     }
 }

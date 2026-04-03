@@ -18,7 +18,7 @@ class BebeController extends Controller
     public function index(): JsonResponse
     {
         $bebes = $this->bebeService->getAll();
-        return response()->json($bebes);
+        return response()->json($bebes->map(fn ($bebe) => $bebe->toContractArray())->values());
     }
 
     /**
@@ -27,12 +27,7 @@ class BebeController extends Controller
     public function show(string $id): JsonResponse
     {
         $bebe = $this->bebeService->get($id);
-        
-        if (!$bebe) {
-            return response()->json(['message' => 'Bebe not found'], 404);
-        }
-        
-        return response()->json($bebe);
+        return response()->json($bebe->toContractArray());
     }
 
     /**
@@ -40,18 +35,8 @@ class BebeController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
-        $validated = $request->validate([
-            'maman_id' => 'required|exists:users,id',
-            'nom' => 'required|string|max:255',
-            'date_naissance' => 'required|date',
-            'sexe' => 'required|string|in:M,F',
-            'poids' => 'sometimes|numeric',
-            'taille' => 'sometimes|numeric',
-            'notes' => 'sometimes|string',
-        ]);
-
-        $bebe = $this->bebeService->create($validated);
-        return response()->json($bebe, 201);
+        $bebe = $this->bebeService->create(BebeValidator::store($request->all()));
+        return response()->json($bebe->toContractArray(), 201);
     }
 
     /**
@@ -59,23 +44,8 @@ class BebeController extends Controller
      */
     public function update(Request $request, string $id): JsonResponse
     {
-        $validated = $request->validate([
-            'maman_id' => 'sometimes|exists:users,id',
-            'nom' => 'sometimes|string|max:255',
-            'date_naissance' => 'sometimes|date',
-            'sexe' => 'sometimes|string|in:M,F',
-            'poids' => 'sometimes|numeric',
-            'taille' => 'sometimes|numeric',
-            'notes' => 'sometimes|string',
-        ]);
-
-        $bebe = $this->bebeService->update($id, $validated);
-        
-        if (!$bebe) {
-            return response()->json(['message' => 'Bebe not found'], 404);
-        }
-        
-        return response()->json($bebe);
+        $bebe = $this->bebeService->update($id, BebeValidator::update($request->all()));
+        return response()->json($bebe->toContractArray());
     }
 
     /**
@@ -83,12 +53,8 @@ class BebeController extends Controller
      */
     public function destroy(string $id): JsonResponse
     {
-        $deleted = $this->bebeService->delete($id);
-        
-        if (!$deleted) {
-            return response()->json(['message' => 'Bebe not found'], 404);
-        }
-        
+        $this->bebeService->delete($id);
+
         return response()->json(['message' => 'Bebe deleted successfully']);
     }
 }

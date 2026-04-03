@@ -3,9 +3,10 @@
 namespace App\Features\Carte;
 
 use App\Models\Carte;
+use App\Services\Service;
 use Illuminate\Database\Eloquent\Collection;
 
-class CarteService
+class CarteService extends Service
 {
     /**
      * Récupérer toutes les cartes
@@ -18,9 +19,15 @@ class CarteService
     /**
      * Récupérer une carte par ID
      */
-    public function get(int $id): ?Carte
+    public function get(string $id): ?Carte
     {
-        return Carte::find($id);
+        $carte = Carte::find($id);
+
+        if (!$carte) {
+            $this->notFound('carte_not_found');
+        }
+
+        return $carte;
     }
 
     /**
@@ -39,7 +46,7 @@ class CarteService
         $carte = Carte::find($id);
         
         if (!$carte) {
-            return null;
+            $this->notFound('carte_not_found');
         }
 
         $carte->update($data);
@@ -55,7 +62,7 @@ class CarteService
         $carte = Carte::find($id);
         
         if (!$carte) {
-            return false;
+            $this->notFound('carte_not_found');
         }
 
         return $carte->delete();

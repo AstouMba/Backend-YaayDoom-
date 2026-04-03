@@ -18,7 +18,9 @@ COPY docker/backend-entrypoint.sh /usr/local/bin/backend-entrypoint.sh
 
 RUN chmod +x /usr/local/bin/backend-entrypoint.sh \
     && mkdir -p storage/framework/{cache,data,sessions,testing,views} storage/logs bootstrap/cache \
-    && chmod -R 775 storage bootstrap/cache
+    && chmod -R 775 storage bootstrap/cache \
+    && chmod 600 storage/oauth-private.key \
+    && chmod 660 storage/oauth-public.key
 
 EXPOSE 8000
 

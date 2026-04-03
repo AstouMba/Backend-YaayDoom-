@@ -30,10 +30,6 @@ class AdminController extends Controller
     {
         $admin = $this->adminService->get($id);
 
-        if (!$admin) {
-            return response()->json(['message' => 'Admin not found'], 404);
-        }
-
         return response()->json($admin);
     }
 
@@ -42,14 +38,7 @@ class AdminController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'phone' => 'nullable|string|max:30|unique:users,phone',
-            'password' => 'required|string|min:8',
-        ]);
-
-        $admin = $this->adminService->create($validated);
+        $admin = $this->adminService->create(AdminValidator::store($request->all()));
 
         return response()->json($admin, 201);
     }
@@ -59,18 +48,7 @@ class AdminController extends Controller
      */
     public function update(Request $request, string $id): JsonResponse
     {
-        $validated = $request->validate([
-            'name' => 'sometimes|string|max:255',
-            'email' => 'sometimes|email|unique:users,email,' . $id,
-            'phone' => 'sometimes|nullable|string|max:30|unique:users,phone,' . $id,
-            'password' => 'sometimes|string|min:8',
-        ]);
-
-        $admin = $this->adminService->update($id, $validated);
-
-        if (!$admin) {
-            return response()->json(['message' => 'Admin not found'], 404);
-        }
+        $admin = $this->adminService->update($id, AdminValidator::update($request->all(), $id));
 
         return response()->json($admin);
     }
@@ -80,11 +58,7 @@ class AdminController extends Controller
      */
     public function destroy(string $id): JsonResponse
     {
-        $deleted = $this->adminService->delete($id);
-
-        if (!$deleted) {
-            return response()->json(['message' => 'Admin not found'], 404);
-        }
+        $this->adminService->delete($id);
 
         return response()->json(['message' => 'Admin deleted successfully']);
     }
@@ -98,6 +72,8 @@ class AdminController extends Controller
             'role' => $request->query('role'),
             'status' => $request->query('status'),
             'search' => $request->query('search'),
+            'page' => $request->query('page', 1),
+            'per_page' => $request->query('per_page', 10),
         ]);
 
         return response()->json($users);
@@ -131,8 +107,8 @@ class AdminController extends Controller
         $updated = $this->adminService->approveProfessionnel($user);
 
         return response()->json([
-            'message' => 'Professionnel approuvé avec succès.',
-            'user' => $updated,
+            'success' => true,
+            'message' => 'Professionnel approuvé',
         ]);
     }
 
@@ -141,19 +117,13 @@ class AdminController extends Controller
      */
     public function rejectProfessionnel(Request $request, User $user): JsonResponse
     {
-        if ($user->role !== 'professionnel') {
-            return response()->json(['message' => 'Cet utilisateur n\'est pas un professionnel'], 422);
-        }
-
-        $validated = $request->validate([
-            'motif' => 'nullable|string|max:500',
-        ]);
-
+        $validated = AdminValidator::reject($request->all());
         $updated = $this->adminService->rejectProfessionnel($user, $validated['motif'] ?? null);
 
         return response()->json([
-            'message' => 'Professionnel rejeté.',
-            'user' => $updated,
+            'success' => true,
+            'message' => 'Demande rejetée',
+            'motif' => $request->input('motif'),
         ]);
     }
 
@@ -162,15 +132,11 @@ class AdminController extends Controller
      */
     public function updateUserRole(Request $request, User $user): JsonResponse
     {
-        $validated = $request->validate([
-            'role' => 'required|string|in:maman,professionnel,admin',
-        ]);
-
+        $validated = AdminValidator::role($request->all());
         $updated = $this->adminService->updateRole($user, $validated['role']);
 
         return response()->json([
-            'message' => 'Rôle utilisateur mis à jour.',
-            'user' => $updated,
+            'success' => true,
         ]);
     }
 
@@ -179,15 +145,11 @@ class AdminController extends Controller
      */
     public function updateUserStatus(Request $request, User $user): JsonResponse
     {
-        $validated = $request->validate([
-            'status' => 'required|string|in:actif,inactif',
-        ]);
-
+        $validated = AdminValidator::status($request->all());
         $updated = $this->adminService->updateStatus($user, $validated['status']);
 
         return response()->json([
-            'message' => 'Statut utilisateur mis à jour.',
-            'user' => $updated,
+            'success' => true,
         ]);
     }
 }

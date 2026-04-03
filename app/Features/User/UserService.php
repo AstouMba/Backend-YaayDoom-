@@ -3,23 +3,28 @@
 namespace App\Features\User;
 
 use App\Models\User;
+use App\Services\Service;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Hash;
 
-class UserService
+class UserService extends Service
 {
     /**
      * Créer un nouvel utilisateur
      */
     public function create(array $data): User
     {
+        $data['name'] = $data['name'] ?? $data['nom'] ?? null;
+        $data['phone'] = $data['phone'] ?? $data['telephone'] ?? null;
+        $data['status'] = $data['status'] ?? $data['statut'] ?? 'actif';
+
         return User::create([
             'name' => $data['name'],
             'email' => $data['email'],
             'phone' => $data['phone'] ?? null,
             'password' => Hash::make($data['password']),
             'role' => $data['role'] ?? 'user',
-            'status' => $data['status'] ?? 'actif',
+            'status' => $data['status'],
             'is_validated' => $data['is_validated'] ?? true,
             'specialite' => $data['specialite'] ?? null,
             'matricule' => $data['matricule'] ?? null,
@@ -31,9 +36,15 @@ class UserService
     /**
      * Récupérer un utilisateur par ID
      */
-    public function get(int $id): ?User
+    public function get(string $id): ?User
     {
-        return User::find($id);
+        $user = User::find($id);
+
+        if (!$user) {
+            $this->notFound('user_not_found');
+        }
+
+        return $user;
     }
 
     /**
@@ -52,12 +63,16 @@ class UserService
         $user = User::find($id);
 
         if (!$user) {
-            return null;
+            $this->notFound('user_not_found');
         }
 
-        $user->name = $data['name'] ?? $user->name;
+        $data['name'] = $data['name'] ?? $data['nom'] ?? $user->name;
+        $data['phone'] = $data['phone'] ?? $data['telephone'] ?? $user->phone;
+        $data['status'] = $data['status'] ?? $data['statut'] ?? $user->status;
+
+        $user->name = $data['name'];
         $user->email = $data['email'] ?? $user->email;
-        $user->phone = $data['phone'] ?? $user->phone;
+        $user->phone = $data['phone'];
 
         if (isset($data['password'])) {
             $user->password = Hash::make($data['password']);
@@ -104,7 +119,7 @@ class UserService
         $user = User::find($id);
 
         if (!$user) {
-            return false;
+            $this->notFound('user_not_found');
         }
 
         return $user->delete();

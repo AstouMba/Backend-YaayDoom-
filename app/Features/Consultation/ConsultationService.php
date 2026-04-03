@@ -3,9 +3,10 @@
 namespace App\Features\Consultation;
 
 use App\Models\Consultation;
+use App\Services\Service;
 use Illuminate\Database\Eloquent\Collection;
 
-class ConsultationService
+class ConsultationService extends Service
 {
     /**
      * Récupérer toutes les consultations
@@ -18,9 +19,15 @@ class ConsultationService
     /**
      * Récupérer une consultation par ID
      */
-    public function get(int $id): ?Consultation
+    public function get(string $id): ?Consultation
     {
-        return Consultation::find($id);
+        $consultation = Consultation::find($id);
+
+        if (!$consultation) {
+            $this->notFound('consultation_not_found');
+        }
+
+        return $consultation;
     }
 
     /**
@@ -39,7 +46,7 @@ class ConsultationService
         $consultation = Consultation::find($id);
         
         if (!$consultation) {
-            return null;
+            $this->notFound('consultation_not_found');
         }
 
         $consultation->update($data);
@@ -55,7 +62,7 @@ class ConsultationService
         $consultation = Consultation::find($id);
         
         if (!$consultation) {
-            return false;
+            $this->notFound('consultation_not_found');
         }
 
         return $consultation->delete();

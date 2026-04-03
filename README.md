@@ -353,7 +353,7 @@ docker compose up -d --build
 
 Notes:
 
-- `RUN_MIGRATIONS=true` lance les migrations au demarrage du conteneur
+- `USE_MOCK_DATA=true` remplit automatiquement la base avec les donnees de demo au demarrage
 - `APP_URL` et `L5_SWAGGER_CONST_HOST` doivent correspondre a l'URL publique du service
 - si tu relies le backend a PostgreSQL, verifie que `DB_URL` pointe vers la bonne instance
 

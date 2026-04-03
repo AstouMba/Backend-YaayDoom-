@@ -3,10 +3,11 @@
 namespace App\Features\Professionnel;
 
 use App\Models\User;
+use App\Services\Service;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Hash;
 
-class ProfessionnelService
+class ProfessionnelService extends Service
 {
     /**
      * Récupérer tous les professionnels
@@ -19,9 +20,15 @@ class ProfessionnelService
     /**
      * Récupérer un professionnel par ID
      */
-    public function get(int $id): ?User
+    public function get(string $id): ?User
     {
-        return User::where('role', 'professionnel')->find($id);
+        $professionnel = User::where('role', 'professionnel')->find($id);
+
+        if (!$professionnel) {
+            $this->notFound('professionnel_not_found');
+        }
+
+        return $professionnel;
     }
 
     /**
@@ -51,7 +58,7 @@ class ProfessionnelService
         $professionnel = User::where('role', 'professionnel')->find($id);
 
         if (!$professionnel) {
-            return null;
+            $this->notFound('professionnel_not_found');
         }
 
         $professionnel->name = $data['name'] ?? $professionnel->name;
@@ -95,7 +102,7 @@ class ProfessionnelService
         $professionnel = User::where('role', 'professionnel')->find($id);
 
         if (!$professionnel) {
-            return false;
+            $this->notFound('professionnel_not_found');
         }
 
         return $professionnel->delete();

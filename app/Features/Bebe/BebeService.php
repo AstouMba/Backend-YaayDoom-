@@ -3,9 +3,10 @@
 namespace App\Features\Bebe;
 
 use App\Models\Bebe;
+use App\Services\Service;
 use Illuminate\Database\Eloquent\Collection;
 
-class BebeService
+class BebeService extends Service
 {
     /**
      * Récupérer tous les bébés
@@ -18,9 +19,15 @@ class BebeService
     /**
      * Récupérer un bébé par ID
      */
-    public function get(int $id): ?Bebe
+    public function get(string $id): ?Bebe
     {
-        return Bebe::find($id);
+        $bebe = Bebe::find($id);
+
+        if (!$bebe) {
+            $this->notFound('bebe_not_found');
+        }
+
+        return $bebe;
     }
 
     /**
@@ -28,6 +35,9 @@ class BebeService
      */
     public function create(array $data): Bebe
     {
+        $data['poids_actuel'] = $data['poids_actuel'] ?? $data['poids'] ?? null;
+        $data['taille_actuelle'] = $data['taille_actuelle'] ?? $data['taille'] ?? null;
+
         return Bebe::create($data);
     }
 
@@ -39,7 +49,15 @@ class BebeService
         $bebe = Bebe::find($id);
         
         if (!$bebe) {
-            return null;
+            $this->notFound('bebe_not_found');
+        }
+
+        if (array_key_exists('poids', $data) && !array_key_exists('poids_actuel', $data)) {
+            $data['poids_actuel'] = $data['poids'];
+        }
+
+        if (array_key_exists('taille', $data) && !array_key_exists('taille_actuelle', $data)) {
+            $data['taille_actuelle'] = $data['taille'];
         }
 
         $bebe->update($data);
@@ -55,7 +73,7 @@ class BebeService
         $bebe = Bebe::find($id);
         
         if (!$bebe) {
-            return false;
+            $this->notFound('bebe_not_found');
         }
 
         return $bebe->delete();

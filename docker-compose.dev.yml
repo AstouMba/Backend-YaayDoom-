@@ -6,7 +6,7 @@ services:
     env_file:
       - .env
     environment:
-      RUN_MIGRATIONS: "false"
+      USE_MOCK_DATA: "true"
     volumes:
       - .:/var/www/html
       - backend_vendor:/var/www/html/vendor

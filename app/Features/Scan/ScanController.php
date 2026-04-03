@@ -28,11 +28,6 @@ class ScanController extends Controller
     public function show(string $id): JsonResponse
     {
         $scan = $this->scanService->get($id);
-        
-        if (!$scan) {
-            return response()->json(['message' => 'Scan not found'], 404);
-        }
-        
         return response()->json($scan);
     }
 
@@ -41,15 +36,7 @@ class ScanController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
-        $validated = $request->validate([
-            'bebe_id' => 'required|exists:bebes,id',
-            'type_scan' => 'required|string',
-            'date_scan' => 'required|date',
-            'resultat' => 'sometimes|string',
-            'notes' => 'sometimes|string',
-        ]);
-
-        $scan = $this->scanService->create($validated);
+        $scan = $this->scanService->create(ScanValidator::store($request->all()));
         return response()->json($scan, 201);
     }
 
@@ -58,20 +45,7 @@ class ScanController extends Controller
      */
     public function update(Request $request, string $id): JsonResponse
     {
-        $validated = $request->validate([
-            'bebe_id' => 'sometimes|exists:bebes,id',
-            'type_scan' => 'sometimes|string',
-            'date_scan' => 'sometimes|date',
-            'resultat' => 'sometimes|string',
-            'notes' => 'sometimes|string',
-        ]);
-
-        $scan = $this->scanService->update($id, $validated);
-        
-        if (!$scan) {
-            return response()->json(['message' => 'Scan not found'], 404);
-        }
-        
+        $scan = $this->scanService->update($id, ScanValidator::update($request->all()));
         return response()->json($scan);
     }
 
@@ -80,12 +54,8 @@ class ScanController extends Controller
      */
     public function destroy(string $id): JsonResponse
     {
-        $deleted = $this->scanService->delete($id);
-        
-        if (!$deleted) {
-            return response()->json(['message' => 'Scan not found'], 404);
-        }
-        
+        $this->scanService->delete($id);
+
         return response()->json(['message' => 'Scan deleted successfully']);
     }
 
@@ -94,18 +64,10 @@ class ScanController extends Controller
      */
     public function resolve(Request $request): JsonResponse
     {
-        $validated = $request->validate([
-            'qr_code' => 'required|string|min:1|max:255',
-        ]);
-
         $result = $this->scanService->resolveFromQrCode(
-            $validated['qr_code'],
+            ScanValidator::resolve($request->all())['qr_code'],
             Auth::id()
         );
-
-        if (!$result) {
-            return response()->json(['message' => 'Patient non trouvé'], 404);
-        }
 
         return response()->json($result);
     }

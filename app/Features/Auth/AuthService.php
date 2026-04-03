@@ -3,11 +3,11 @@
 namespace App\Features\Auth;
 
 use App\Models\User;
+use App\Services\Service;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\ValidationException;
 
-class AuthService
+class AuthService extends Service
 {
     /**
      * Inscrire un nouvel utilisateur
@@ -15,6 +15,9 @@ class AuthService
     public function register(array $data): User
     {
         $role = $data['role'] ?? 'maman';
+        $data['name'] = $data['name'] ?? $data['fullName'] ?? null;
+        $data['specialite'] = $data['specialite'] ?? $data['specialty'] ?? null;
+        $data['centre_de_sante'] = $data['centre_de_sante'] ?? $data['healthCenter'] ?? null;
 
         return User::create([
             'name' => $data['name'],
@@ -34,15 +37,33 @@ class AuthService
     /**
      * Connecter un utilisateur via email ou téléphone
      */
-    public function login(string $login, string $password): ?array
+    public function login(array $data): array
     {
+        $login = $data['login'] ?? $data['loginId'] ?? $data['email'] ?? null;
+
+        if (!$login) {
+            $this->unprocessable('login_required', [
+                'login' => ['required'],
+            ]);
+        }
+
         $user = User::query()
             ->where('email', $login)
             ->orWhere('phone', $login)
             ->first();
 
-        if (!$user || !Hash::check($password, $user->password)) {
-            return null;
+        if (!$user || !Hash::check($data['password'], $user->password)) {
+            $this->fail('invalid_credentials', 401);
+        }
+
+        if ($user->role === 'professionnel' && !$user->is_validated) {
+            $this->fail('professional_pending', 403, 'forbidden', [
+                'user' => $user->toContractArray(),
+            ]);
+        }
+
+        if ($user->status === 'inactif') {
+            $this->fail('inactive_account', 403, 'forbidden');
         }
 
         Auth::login($user);
@@ -77,13 +98,14 @@ class AuthService
     /**
      * Mettre à jour le profil de l'utilisateur connecté
      */
-    public function updateMe(array $data): ?User
+    public function updateMe(array $data, ?User $user = null): User
     {
-        $user = Auth::user();
-
         if (!$user) {
-            return null;
+            $this->unauthorized();
         }
+
+        $data['name'] = $data['name'] ?? $data['nom'] ?? $user->name;
+        $data['phone'] = $data['phone'] ?? $data['telephone'] ?? $user->phone;
 
         $user->update($data);
 
@@ -93,24 +115,20 @@ class AuthService
     /**
      * Changer le mot de passe de l'utilisateur connecté
      */
-    public function changePassword(string $currentPassword, string $newPassword): void
+    public function changePassword(array $data, ?User $user = null): void
     {
-        $user = Auth::user();
-
         if (!$user) {
-            throw ValidationException::withMessages([
-                'user' => ['Utilisateur non authentifié.'],
-            ]);
+            $this->unauthorized();
         }
 
-        if (!Hash::check($currentPassword, $user->password)) {
-            throw ValidationException::withMessages([
-                'currentPassword' => ['Le mot de passe actuel est incorrect.'],
+        if (!Hash::check($data['currentPassword'], $user->password)) {
+            $this->unprocessable('current_password_incorrect', [
+                'currentPassword' => ['invalid'],
             ]);
         }
 
         $user->update([
-            'password' => Hash::make($newPassword),
+            'password' => Hash::make($data['newPassword']),
         ]);
     }
 }

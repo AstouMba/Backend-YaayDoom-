@@ -3,9 +3,11 @@
 namespace App\Features\Grossesse;
 
 use App\Models\Grossesse;
+use App\Models\User;
+use App\Services\Service;
 use Illuminate\Database\Eloquent\Collection;
 
-class GrossesseService
+class GrossesseService extends Service
 {
     /**
      * Récupérer toutes les grossesses
@@ -18,17 +20,30 @@ class GrossesseService
     /**
      * Récupérer une grossesse par ID
      */
-    public function get(int $id): ?Grossesse
+    public function get(string $id): ?Grossesse
     {
-        return Grossesse::find($id);
+        $grossesse = Grossesse::find($id);
+
+        if (!$grossesse) {
+            $this->notFound('grossesse_not_found');
+        }
+
+        return $grossesse;
     }
 
     /**
      * Créer une grossesse
      */
-    public function create(array $data): Grossesse
+    public function create(array $data, ?User $user = null): Grossesse
     {
+        if (!$user) {
+            $this->unauthorized();
+        }
+
+        $data['maman_id'] = $user->id;
         $data['statut'] = 'en_attente';
+        $data['nombre_grossesses_precedentes'] = $data['nombre_grossesses_precedentes'] ?? 0;
+        $data['trimestre'] = $data['trimestre'] ?? 1;
 
         return Grossesse::create($data);
     }
@@ -41,7 +56,7 @@ class GrossesseService
         $grossesse = Grossesse::find($id);
         
         if (!$grossesse) {
-            return null;
+            $this->notFound('grossesse_not_found');
         }
 
         $grossesse->update($data);
@@ -57,7 +72,7 @@ class GrossesseService
         $grossesse = Grossesse::find($id);
         
         if (!$grossesse) {
-            return false;
+            $this->notFound('grossesse_not_found');
         }
 
         return $grossesse->delete();

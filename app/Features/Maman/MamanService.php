@@ -3,10 +3,11 @@
 namespace App\Features\Maman;
 
 use App\Models\User;
+use App\Services\Service;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Hash;
 
-class MamanService
+class MamanService extends Service
 {
     /**
      * Récupérer toutes les mamans
@@ -19,9 +20,15 @@ class MamanService
     /**
      * Récupérer une maman par ID
      */
-    public function get(int $id): ?User
+    public function get(string $id): ?User
     {
-        return User::where('role', 'maman')->find($id);
+        $maman = User::where('role', 'maman')->find($id);
+
+        if (!$maman) {
+            $this->notFound('maman_not_found');
+        }
+
+        return $maman;
     }
 
     /**
@@ -48,7 +55,7 @@ class MamanService
         $maman = User::where('role', 'maman')->find($id);
 
         if (!$maman) {
-            return null;
+            $this->notFound('maman_not_found');
         }
 
         $maman->name = $data['name'] ?? $maman->name;
@@ -76,7 +83,7 @@ class MamanService
         $maman = User::where('role', 'maman')->find($id);
 
         if (!$maman) {
-            return false;
+            $this->notFound('maman_not_found');
         }
 
         return $maman->delete();

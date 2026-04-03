@@ -6,11 +6,13 @@ use App\Models\Consultation;
 use App\Models\Grossesse;
 use App\Models\User;
 use App\Models\Vaccination;
+use App\Services\Service;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Carbon;
 
-class AdminService
+class AdminService extends Service
 {
     /**
      * Récupérer tous les administrateurs
@@ -23,9 +25,15 @@ class AdminService
     /**
      * Récupérer un administrateur par ID
      */
-    public function get(int $id): ?User
+    public function get(string $id): ?User
     {
-        return User::where('role', 'admin')->find($id);
+        $admin = User::where('role', 'admin')->find($id);
+
+        if (!$admin) {
+            $this->notFound('admin_not_found');
+        }
+
+        return $admin;
     }
 
     /**
@@ -52,7 +60,7 @@ class AdminService
         $admin = User::where('role', 'admin')->find($id);
 
         if (!$admin) {
-            return null;
+            $this->notFound('admin_not_found');
         }
 
         $admin->name = $data['name'] ?? $admin->name;
@@ -76,7 +84,7 @@ class AdminService
         $admin = User::where('role', 'admin')->find($id);
 
         if (!$admin) {
-            return false;
+            $this->notFound('admin_not_found');
         }
 
         return $admin->delete();
@@ -109,6 +117,9 @@ class AdminService
             ->latest();
 
         $users = $query->get();
+        $page = max(1, (int) ($filters['page'] ?? 1));
+        $perPage = max(1, (int) ($filters['per_page'] ?? 10));
+        $users = $users->slice(($page - 1) * $perPage, $perPage)->values();
 
         return $users
             ->map(fn (User $user): array => $this->formatUserForAdmin($user))
@@ -158,6 +169,10 @@ class AdminService
      */
     public function approveProfessionnel(User $user): User
     {
+        if ($user->role !== 'professionnel') {
+            $this->unprocessable('not_a_professional');
+        }
+
         $user->is_validated = true;
         $user->rejection_reason = null;
         $user->status = 'actif';
@@ -171,6 +186,10 @@ class AdminService
      */
     public function rejectProfessionnel(User $user, ?string $reason): User
     {
+        if ($user->role !== 'professionnel') {
+            $this->unprocessable('not_a_professional');
+        }
+
         $user->is_validated = false;
         $user->status = 'inactif';
         $user->rejection_reason = $reason;
@@ -184,13 +203,38 @@ class AdminService
      */
     public function getStats(): array
     {
+        $months = [
+            1 => 'Jan',
+            2 => 'Fév',
+            3 => 'Mar',
+            4 => 'Avr',
+            5 => 'Mai',
+            6 => 'Juin',
+            7 => 'Juil',
+            8 => 'Août',
+            9 => 'Sep',
+            10 => 'Oct',
+            11 => 'Nov',
+            12 => 'Déc',
+        ];
+
+        $grossessesParMois = [];
+        foreach (range(1, 12) as $month) {
+            $grossessesParMois[] = Grossesse::query()
+                ->whereYear('created_at', Carbon::now()->year)
+                ->whereMonth('created_at', $month)
+                ->count();
+        }
+
         return [
             'totalMamans' => User::where('role', 'maman')->count(),
             'totalProfessionnels' => User::where('role', 'professionnel')->count(),
-            'grossessesActives' => Grossesse::where('statut', 'en_cours')->count(),
+            'grossessesActives' => Grossesse::whereIn('statut', ['en_cours', 'validee'])->count(),
             'professionnelsEnAttente' => User::where('role', 'professionnel')->where('is_validated', false)->count(),
             'consultationsTotal' => Consultation::count(),
             'vaccinationsTotal' => Vaccination::count(),
+            'grossessesParMois' => $grossessesParMois,
+            'labelsParMois' => array_values($months),
         ];
     }
 
@@ -211,6 +255,7 @@ class AdminService
             'isValidated' => (bool) $user->is_validated,
             'statut' => $user->status,
             'motifRejet' => $user->rejection_reason,
+            'documentUrl' => null,
             'dateInscription' => optional($user->created_at)?->format('Y-m-d'),
         ];
     }

@@ -18,7 +18,7 @@ class ConsultationController extends Controller
     public function index(): JsonResponse
     {
         $consultations = $this->consultationService->getAll();
-        return response()->json($consultations);
+        return response()->json($consultations->map(fn ($consultation) => $consultation->toContractArray())->values());
     }
 
     /**
@@ -27,12 +27,7 @@ class ConsultationController extends Controller
     public function show(string $id): JsonResponse
     {
         $consultation = $this->consultationService->get($id);
-        
-        if (!$consultation) {
-            return response()->json(['message' => 'Consultation not found'], 404);
-        }
-        
-        return response()->json($consultation);
+        return response()->json($consultation->toContractArray());
     }
 
     /**
@@ -40,17 +35,8 @@ class ConsultationController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
-        $validated = $request->validate([
-            'maman_id' => 'required|exists:users,id',
-            'professionnel_id' => 'required|exists:users,id',
-            'date' => 'required|date',
-            'heure' => 'required',
-            'type' => 'required|string',
-            'notes' => 'sometimes|string',
-        ]);
-
-        $consultation = $this->consultationService->create($validated);
-        return response()->json($consultation, 201);
+        $consultation = $this->consultationService->create(ConsultationValidator::store($request->all()));
+        return response()->json($consultation->toContractArray(), 201);
     }
 
     /**
@@ -58,22 +44,8 @@ class ConsultationController extends Controller
      */
     public function update(Request $request, string $id): JsonResponse
     {
-        $validated = $request->validate([
-            'maman_id' => 'sometimes|exists:users,id',
-            'professionnel_id' => 'sometimes|exists:users,id',
-            'date' => 'sometimes|date',
-            'heure' => 'sometimes',
-            'type' => 'sometimes|string',
-            'notes' => 'sometimes|string',
-        ]);
-
-        $consultation = $this->consultationService->update($id, $validated);
-        
-        if (!$consultation) {
-            return response()->json(['message' => 'Consultation not found'], 404);
-        }
-        
-        return response()->json($consultation);
+        $consultation = $this->consultationService->update($id, ConsultationValidator::update($request->all()));
+        return response()->json($consultation->toContractArray());
     }
 
     /**
@@ -81,12 +53,8 @@ class ConsultationController extends Controller
      */
     public function destroy(string $id): JsonResponse
     {
-        $deleted = $this->consultationService->delete($id);
-        
-        if (!$deleted) {
-            return response()->json(['message' => 'Consultation not found'], 404);
-        }
-        
+        $this->consultationService->delete($id);
+
         return response()->json(['message' => 'Consultation deleted successfully']);
     }
 }
