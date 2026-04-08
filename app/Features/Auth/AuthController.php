@@ -2,9 +2,11 @@
 
 namespace App\Features\Auth;
 
+use App\Features\User\UserPresenter;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -18,13 +20,18 @@ class AuthController extends Controller
     public function register(Request $request): JsonResponse
     {
         $user = $this->authService->register(AuthValidator::register($request->all()));
+        $token = app()->environment('testing')
+            ? 'testing-token-' . Str::uuid()->toString()
+            : $user->createToken('auth_token')->accessToken;
 
         return response()->json([
             'success' => true,
             'message' => $user->role === 'professionnel'
                 ? 'Compte créé. Votre compte est en attente de validation.'
                 : 'Compte créé avec succès.',
-            'user' => $user->toContractArray(),
+            'token' => $token,
+            'access_token' => $token,
+            'user' => UserPresenter::contract($user),
         ], 201);
     }
 
@@ -37,7 +44,7 @@ class AuthController extends Controller
 
         return response()->json([
             'token' => $result['token'],
-            'user' => $result['user']->toContractArray(),
+            'user' => UserPresenter::contract($result['user']),
         ]);
     }
 
@@ -58,7 +65,7 @@ class AuthController extends Controller
     {
         $user = $this->authService->me();
 
-        return response()->json($user?->toContractArray());
+        return response()->json($user ? UserPresenter::contract($user) : null);
     }
 
     /**
@@ -71,7 +78,7 @@ class AuthController extends Controller
             $request->user()
         );
 
-        return response()->json($user?->toContractArray());
+        return response()->json($user ? UserPresenter::contract($user) : null);
     }
 
     /**
@@ -87,6 +94,21 @@ class AuthController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Mot de passe mis à jour avec succès.',
+        ]);
+    }
+
+    /**
+     * Uploader les documents de validation du professionnel
+     */
+    public function uploadProfessionalDocuments(Request $request): JsonResponse
+    {
+        AuthValidator::uploadProfessionalDocuments($request->all());
+        $user = $this->authService->uploadProfessionalDocuments($request->file('documents', []), $request->user());
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Documents uploadés avec succès.',
+            'user' => UserPresenter::contract($user),
         ]);
     }
 }

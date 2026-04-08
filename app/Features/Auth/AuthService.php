@@ -2,36 +2,38 @@
 
 namespace App\Features\Auth;
 
+use App\Application\Auth\ChangePassword;
+use App\Application\Auth\DTO\ChangePasswordData;
+use App\Application\Auth\DTO\LoginData;
+use App\Application\Auth\DTO\RegisterData;
+use App\Application\Auth\DTO\UpdateProfileData;
+use App\Application\Auth\GetCurrentUser;
+use App\Application\Auth\LoginUser;
+use App\Application\Auth\LogoutUser;
+use App\Application\Auth\RegisterUser;
+use App\Application\Auth\UploadProfessionalDocuments;
+use App\Application\Auth\UpdateProfile;
 use App\Models\User;
 use App\Services\Service;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 
 class AuthService extends Service
 {
+    public function __construct(
+        private RegisterUser $registerUser,
+        private LoginUser $loginUser,
+        private LogoutUser $logoutUser,
+        private GetCurrentUser $getCurrentUser,
+        private UpdateProfile $updateProfile,
+        private ChangePassword $changePasswordUseCase,
+        private UploadProfessionalDocuments $uploadProfessionalDocumentsUseCase,
+    ) {}
+
     /**
      * Inscrire un nouvel utilisateur
      */
     public function register(array $data): User
     {
-        $role = $data['role'] ?? 'maman';
-        $data['name'] = $data['name'] ?? $data['fullName'] ?? null;
-        $data['specialite'] = $data['specialite'] ?? $data['specialty'] ?? null;
-        $data['centre_de_sante'] = $data['centre_de_sante'] ?? $data['healthCenter'] ?? null;
-
-        return User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'phone' => $data['phone'] ?? null,
-            'password' => Hash::make($data['password']),
-            'role' => $role,
-            'is_validated' => $role === 'professionnel' ? false : true,
-            'status' => 'actif',
-            'specialite' => $data['specialite'] ?? null,
-            'matricule' => $data['matricule'] ?? null,
-            'centre_de_sante' => $data['centre_de_sante'] ?? null,
-            'rejection_reason' => null,
-        ]);
+        return $this->registerUser->execute(RegisterData::fromArray($data));
     }
 
     /**
@@ -39,40 +41,7 @@ class AuthService extends Service
      */
     public function login(array $data): array
     {
-        $login = $data['login'] ?? $data['loginId'] ?? $data['email'] ?? null;
-
-        if (!$login) {
-            $this->unprocessable('login_required', [
-                'login' => ['required'],
-            ]);
-        }
-
-        $user = User::query()
-            ->where('email', $login)
-            ->orWhere('phone', $login)
-            ->first();
-
-        if (!$user || !Hash::check($data['password'], $user->password)) {
-            $this->fail('invalid_credentials', 401);
-        }
-
-        if ($user->role === 'professionnel' && !$user->is_validated) {
-            $this->fail('professional_pending', 403, 'forbidden', [
-                'user' => $user->toContractArray(),
-            ]);
-        }
-
-        if ($user->status === 'inactif') {
-            $this->fail('inactive_account', 403, 'forbidden');
-        }
-
-        Auth::login($user);
-        $token = $user->createToken('auth_token')->accessToken;
-
-        return [
-            'user' => $user,
-            'token' => $token,
-        ];
+        return $this->loginUser->execute(LoginData::fromArray($data));
     }
 
     /**
@@ -80,11 +49,7 @@ class AuthService extends Service
      */
     public function logout(): void
     {
-        $user = Auth::user();
-
-        if ($user) {
-            $user->tokens()->delete();
-        }
+        $this->logoutUser->execute();
     }
 
     /**
@@ -92,7 +57,7 @@ class AuthService extends Service
      */
     public function me(): ?User
     {
-        return Auth::user();
+        return $this->getCurrentUser->execute();
     }
 
     /**
@@ -100,16 +65,7 @@ class AuthService extends Service
      */
     public function updateMe(array $data, ?User $user = null): User
     {
-        if (!$user) {
-            $this->unauthorized();
-        }
-
-        $data['name'] = $data['name'] ?? $data['nom'] ?? $user->name;
-        $data['phone'] = $data['phone'] ?? $data['telephone'] ?? $user->phone;
-
-        $user->update($data);
-
-        return $user->fresh();
+        return $this->updateProfile->execute(UpdateProfileData::fromArray($data), $user);
     }
 
     /**
@@ -117,18 +73,16 @@ class AuthService extends Service
      */
     public function changePassword(array $data, ?User $user = null): void
     {
-        if (!$user) {
-            $this->unauthorized();
-        }
+        $this->changePasswordUseCase->execute(ChangePasswordData::fromArray($data), $user);
+    }
 
-        if (!Hash::check($data['currentPassword'], $user->password)) {
-            $this->unprocessable('current_password_incorrect', [
-                'currentPassword' => ['invalid'],
-            ]);
-        }
-
-        $user->update([
-            'password' => Hash::make($data['newPassword']),
-        ]);
+    /**
+     * Ajouter les documents de vérification d'un professionnel.
+     *
+     * @param array<int, \Illuminate\Http\UploadedFile> $documents
+     */
+    public function uploadProfessionalDocuments(array $documents, ?User $user = null): User
+    {
+        return $this->uploadProfessionalDocumentsUseCase->execute($documents, $user);
     }
 }

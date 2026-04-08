@@ -2,7 +2,7 @@
     "openapi": "3.0.0",
     "info": {
         "title": "YaayDoom API",
-        "description": "Documentation OpenAPI strictement alignée sur les endpoints utilisés par le frontend, triée par profil",
+        "description": "Documentation OpenAPI alignée sur le backend courant et le contrat frontend UUID-only",
         "version": "1.0.0"
     },
     "servers": [
@@ -21,10 +21,121 @@
                     "Auth"
                 ],
                 "summary": "Inscription utilisateur",
+                "description": "La maman s'inscrit en une étape avec téléphone, nom complet, date de naissance et mot de passe. Le professionnel fournit aussi ses informations de métier et reste en attente de validation admin.",
                 "operationId": "119f45032d3afea4e5371c207ab0426c",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "fullName",
+                                    "phone",
+                                    "password",
+                                    "password_confirmation",
+                                    "role"
+                                ],
+                                "properties": {
+                                    "fullName": {
+                                        "type": "string",
+                                        "example": "Aminata Diallo"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "+221771234567"
+                                    },
+                                    "birthDate": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "1992-03-15",
+                                        "nullable": true
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "aminata@example.com",
+                                        "nullable": true
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "password123"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "example": "password123"
+                                    },
+                                    "role": {
+                                        "type": "string",
+                                        "example": "maman",
+                                        "enum": [
+                                            "maman",
+                                            "professionnel"
+                                        ]
+                                    },
+                                    "specialty": {
+                                        "type": "string",
+                                        "example": "Gynécologue",
+                                        "nullable": true
+                                    },
+                                    "matricule": {
+                                        "type": "string",
+                                        "example": "GYN-2024-001",
+                                        "nullable": true
+                                    },
+                                    "healthCenter": {
+                                        "type": "string",
+                                        "example": "Hôpital Principal de Dakar",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "201": {
-                        "description": "Compte créé"
+                        "description": "Compte créé",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "user": {
+                                        "id": "c1f0f2ce-8a34-4f95-8a3a-4c9d33a0b1d1",
+                                        "nom": "Aminata Diallo",
+                                        "telephone": "+221771234567",
+                                        "date_naissance": "1992-03-15",
+                                        "role": "maman",
+                                        "specialite": null,
+                                        "statut": "actif",
+                                        "is_validated": true
+                                    },
+                                    "token": "jwt-token-here",
+                                    "access_token": "jwt-token-here",
+                                    "message": "Compte créé avec succès."
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erreur de validation",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Le formulaire contient des erreurs",
+                                    "errors": {
+                                        "email": [
+                                            "Le champ est requis"
+                                        ],
+                                        "password": [
+                                            "Le champ est requis"
+                                        ]
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -35,10 +146,85 @@
                     "Auth"
                 ],
                 "summary": "Connexion utilisateur",
+                "description": "La maman se connecte avec son téléphone. Le professionnel et l'admin se connectent avec leur email.",
                 "operationId": "c89bcfcd1f1f9f989779b60c2b728a1c",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "loginId",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "loginId": {
+                                        "type": "string",
+                                        "example": "+221771234567"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "demo1234"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
-                        "description": "Connexion réussie"
+                        "description": "Connexion réussie",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "token": "jwt-token-here",
+                                    "user": {
+                                        "id": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
+                                        "nom": "Fatou Diop",
+                                        "telephone": "+221 77 123 45 67",
+                                        "date_naissance": "1991-04-10",
+                                        "role": "maman",
+                                        "specialite": null,
+                                        "matricule": null,
+                                        "centre_de_sante": null,
+                                        "is_validated": true,
+                                        "statut": "actif"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erreur de validation",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Le formulaire contient des erreurs",
+                                    "errors": {
+                                        "loginId": [
+                                            "Le champ est requis"
+                                        ],
+                                        "password": [
+                                            "Le champ est requis"
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Identifiants invalides",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Identifiants invalides"
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -52,7 +238,26 @@
                 "operationId": "42b221d4f1f429ee132556b2eb28f7aa",
                 "responses": {
                     "200": {
-                        "description": "Déconnecté"
+                        "description": "Déconnecté",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Non authentifié"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -71,24 +276,35 @@
                 "operationId": "a14eddccabaeebebd3c1e0d1839c8970",
                 "responses": {
                     "200": {
-                        "description": "Profil"
-                    }
-                },
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ]
-            },
-            "patch": {
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "Mise à jour profil connecté",
-                "operationId": "2fd092e92aeae2e2b55e28eee685675e",
-                "responses": {
-                    "200": {
-                        "description": "Profil mis à jour"
+                        "description": "Profil",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "id": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
+                                    "nom": "Fatou Diop",
+                                    "telephone": "+221 77 123 45 67",
+                                    "date_naissance": "1991-04-10",
+                                    "role": "maman",
+                                    "specialite": null,
+                                    "matricule": null,
+                                    "centre_de_sante": null,
+                                    "is_validated": true,
+                                    "statut": "actif"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Non authentifié"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -98,16 +314,214 @@
                 ]
             }
         },
-        "/api/auth/change-password": {
-            "post": {
+        "/api/auth/profile": {
+            "put": {
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Changer mot de passe",
-                "operationId": "41a4de67bb8dba3efcdd101dc102d3bf",
+                "summary": "Mettre à jour le profil connecté",
+                "operationId": "251f49a3024720e8a29eaca287a4c973",
                 "responses": {
                     "200": {
-                        "description": "Mot de passe modifié"
+                        "description": "Profil mis à jour",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "id": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
+                                    "nom": "Fatou Diop",
+                                    "email": "fatou.diop@email.com",
+                                    "telephone": "+221 77 123 45 67",
+                                    "role": "professionnel",
+                                    "specialite": "Sage-femme",
+                                    "statut": "actif",
+                                    "is_validated": true
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erreur de validation",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Le formulaire contient des erreurs.",
+                                    "errors": {
+                                        "email": [
+                                            "Le champ doit être une adresse email valide"
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            }
+        },
+        "/api/auth/password": {
+            "patch": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Changer le mot de passe",
+                "operationId": "c8558efb95a90d9617659151d0f89ef9",
+                "responses": {
+                    "200": {
+                        "description": "Mot de passe modifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "message": "Mot de passe mis à jour avec succès."
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Non authentifié"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erreur de validation",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Le formulaire contient des erreurs.",
+                                    "errors": {
+                                        "newPassword": [
+                                            "Le champ est requis."
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            }
+        },
+        "/api/auth/professional/documents": {
+            "post": {
+                "tags": [
+                    "Auth",
+                    "Professionnel"
+                ],
+                "summary": "Uploader les documents de validation du professionnel",
+                "operationId": "e81a779e42a0ae6f0db7e86968a59124",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "documents"
+                                ],
+                                "properties": {
+                                    "documents": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "binary"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Documents uploadés",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "message": "Documents uploadés avec succès.",
+                                    "user": {
+                                        "id": "3a7dbd62-8f9d-4d1e-b7c4-0b2c90a5d111",
+                                        "nom": "Dr. Mariama Ba",
+                                        "documentUrl": "/storage/professionnels/3a7dbd62-8f9d-4d1e-b7c4-0b2c90a5d111/verification/attestation.pdf",
+                                        "documents": [
+                                            {
+                                                "name": "attestation.pdf",
+                                                "url": "/storage/professionnels/3a7dbd62-8f9d-4d1e-b7c4-0b2c90a5d111/verification/attestation.pdf",
+                                                "mime": "application/pdf"
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Non authentifié"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accès interdit",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Forbidden."
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erreur de validation",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Le formulaire contient des erreurs",
+                                    "errors": {
+                                        "documents": [
+                                            "Le champ est requis."
+                                        ]
+                                    }
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -122,11 +536,50 @@
                 "tags": [
                     "Admin"
                 ],
-                "summary": "Liste utilisateurs (admin)",
+                "summary": "Lister les utilisateurs",
                 "operationId": "d8c47b5c6a4aca71c3c2e44e02456497",
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": [
+                                    {
+                                        "id": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
+                                        "nom": "Fatou Diop",
+                                        "email": "fatou.diop@email.com",
+                                        "telephone": "+221 77 123 45 67",
+                                        "role": "maman",
+                                        "specialite": null,
+                                        "dateInscription": "2025-01-15",
+                                        "statut": "actif"
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accès interdit",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Forbidden."
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -145,7 +598,70 @@
                 "operationId": "c56e2810e0b0e3a989f75a3846a655bb",
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "totalMamans": 156,
+                                    "totalProfessionnels": 23,
+                                    "grossessesActives": 89,
+                                    "professionnelsEnAttente": 8,
+                                    "consultationsTotal": 342,
+                                    "vaccinationsTotal": 1087,
+                                    "grossessesParMois": [
+                                        12,
+                                        19,
+                                        15,
+                                        22,
+                                        18,
+                                        25,
+                                        20,
+                                        28,
+                                        24,
+                                        31,
+                                        22,
+                                        18
+                                    ],
+                                    "labelsParMois": [
+                                        "Jan",
+                                        "Fév",
+                                        "Mar",
+                                        "Avr",
+                                        "Mai",
+                                        "Juin",
+                                        "Juil",
+                                        "Août",
+                                        "Sep",
+                                        "Oct",
+                                        "Nov",
+                                        "Déc"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accès interdit",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Forbidden."
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -164,7 +680,53 @@
                 "operationId": "14c9ff49174b7f5f4d9f2ceb1c4badbb",
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": [
+                                    {
+                                        "id": "3a7dbd62-8f9d-4d1e-b7c4-0b2c90a5d111",
+                                        "nom": "Dr. Aminata Ba",
+                                        "email": "aminata.ba@hopital.sn",
+                                        "telephone": "+221 77 123 45 67",
+                                        "specialite": "Gynécologue",
+                                        "matricule": "GYN-2024-001",
+                                        "centreDesante": "Hôpital Principal de Dakar",
+                                        "documentUrl": "/storage/professionnels/3a7dbd62-8f9d-4d1e-b7c4-0b2c90a5d111/verification/attestation.pdf",
+                                        "documents": [
+                                            {
+                                                "name": "attestation.pdf",
+                                                "url": "/storage/professionnels/3a7dbd62-8f9d-4d1e-b7c4-0b2c90a5d111/verification/attestation.pdf"
+                                            }
+                                        ],
+                                        "dateInscription": "2025-01-15"
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accès interdit",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Forbidden."
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -179,7 +741,7 @@
                 "tags": [
                     "Admin"
                 ],
-                "summary": "Approuver professionnel",
+                "summary": "Approuver un professionnel",
                 "operationId": "1c81038350c3f5c16a8ed46ec1cc930c",
                 "parameters": [
                     {
@@ -187,13 +749,100 @@
                         "in": "path",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "string",
+                            "format": "uuid"
                         }
                     }
                 ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "motif"
+                                ],
+                                "properties": {
+                                    "motif": {
+                                        "type": "string",
+                                        "example": "Documents conformes"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
-                        "description": "Approuvé"
+                        "description": "Approuvé",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "message": "Professionnel approuvé",
+                                    "motif": "Documents conformes",
+                                    "professionnel": {
+                                        "id": "3a7dbd62-8f9d-4d1e-b7c4-0b2c90a5d111",
+                                        "nom": "Dr. Aminata Ba",
+                                        "decisionStatus": "approved",
+                                        "decisionMotif": "Documents conformes",
+                                        "decisionDate": "2026-04-07 10:15:00",
+                                        "decisionBy": "8e4d7b4d-1f5a-4f7d-9d2b-3dcd8c0d7a20"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accès interdit",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Forbidden."
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Non trouvé",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Utilisateur introuvable."
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erreur de validation",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Le formulaire contient des erreurs.",
+                                    "errors": {
+                                        "motif": [
+                                            "Le champ est requis."
+                                        ]
+                                    }
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -208,7 +857,7 @@
                 "tags": [
                     "Admin"
                 ],
-                "summary": "Rejeter professionnel",
+                "summary": "Rejeter un professionnel",
                 "operationId": "ca0bb1d30b5b69f0bdb40090f1aeb06a",
                 "parameters": [
                     {
@@ -216,13 +865,100 @@
                         "in": "path",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "string",
+                            "format": "uuid"
                         }
                     }
                 ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "motif"
+                                ],
+                                "properties": {
+                                    "motif": {
+                                        "type": "string",
+                                        "example": "Document incomplet"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
-                        "description": "Rejeté"
+                        "description": "Rejeté",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "message": "Demande rejetée",
+                                    "motif": "Document incomplet",
+                                    "professionnel": {
+                                        "id": "3a7dbd62-8f9d-4d1e-b7c4-0b2c90a5d111",
+                                        "nom": "Dr. Aminata Ba",
+                                        "decisionStatus": "rejected",
+                                        "decisionMotif": "Document incomplet",
+                                        "decisionDate": "2026-04-07 10:15:00",
+                                        "decisionBy": "8e4d7b4d-1f5a-4f7d-9d2b-3dcd8c0d7a20"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accès interdit",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Forbidden."
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Non trouvé",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Utilisateur introuvable."
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erreur de validation",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Le formulaire contient des erreurs.",
+                                    "errors": {
+                                        "motif": [
+                                            "Le champ est requis."
+                                        ]
+                                    }
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -237,7 +973,7 @@
                 "tags": [
                     "Admin"
                 ],
-                "summary": "Changer rôle utilisateur",
+                "summary": "Changer le rôle",
                 "operationId": "315699ad016bd607efc34f6857ac4b4e",
                 "parameters": [
                     {
@@ -245,13 +981,71 @@
                         "in": "path",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "string",
+                            "format": "uuid"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Rôle modifié"
+                        "description": "Rôle modifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accès interdit",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Forbidden."
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Non trouvé",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Utilisateur introuvable."
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erreur de validation",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Le formulaire contient des erreurs.",
+                                    "errors": {
+                                        "role": [
+                                            "Le champ est requis."
+                                        ]
+                                    }
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -266,7 +1060,7 @@
                 "tags": [
                     "Admin"
                 ],
-                "summary": "Changer statut utilisateur",
+                "summary": "Changer le statut",
                 "operationId": "b80f6688950e23460be746d6a31826bd",
                 "parameters": [
                     {
@@ -274,13 +1068,71 @@
                         "in": "path",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "string",
+                            "format": "uuid"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Statut modifié"
+                        "description": "Statut modifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accès interdit",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Forbidden."
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Non trouvé",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Utilisateur introuvable."
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erreur de validation",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Le formulaire contient des erreurs.",
+                                    "errors": {
+                                        "status": [
+                                            "Le champ est requis."
+                                        ]
+                                    }
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -295,7 +1147,7 @@
                 "tags": [
                     "Admin"
                 ],
-                "summary": "Afficher user",
+                "summary": "Afficher un utilisateur",
                 "operationId": "10f989166097b30c13de2f9529d3b38c",
                 "parameters": [
                     {
@@ -303,13 +1155,62 @@
                         "in": "path",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "string",
+                            "format": "uuid"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "id": "2fcb4f4f-7f18-4a44-9b53-b736f0af6d11",
+                                    "nom": "Dr. Aminata Ba",
+                                    "email": "aminata.ba@hopital.sn",
+                                    "telephone": "+221 77 234 56 78",
+                                    "role": "professionnel",
+                                    "specialite": "Gynécologue",
+                                    "dateInscription": "2024-08-05",
+                                    "statut": "actif"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accès interdit",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Forbidden."
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Non trouvé",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Utilisateur introuvable."
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -322,7 +1223,7 @@
                 "tags": [
                     "Admin"
                 ],
-                "summary": "Mettre à jour user",
+                "summary": "Mettre à jour un utilisateur",
                 "operationId": "e65b1dda7d62831b11ffb69cd39c716f",
                 "parameters": [
                     {
@@ -330,13 +1231,78 @@
                         "in": "path",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "string",
+                            "format": "uuid"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Modifié"
+                        "description": "Modifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "id": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
+                                    "nom": "Fatou Diop",
+                                    "email": "fatou.diop@email.com",
+                                    "telephone": "+221 77 123 45 67",
+                                    "role": "maman",
+                                    "specialite": null,
+                                    "dateInscription": "2024-09-10",
+                                    "statut": "actif"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accès interdit",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Forbidden."
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Non trouvé",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Utilisateur introuvable."
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erreur de validation",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Le formulaire contient des erreurs.",
+                                    "errors": {
+                                        "email": [
+                                            "Le champ doit être une adresse email valide."
+                                        ]
+                                    }
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -349,7 +1315,7 @@
                 "tags": [
                     "Admin"
                 ],
-                "summary": "Supprimer user",
+                "summary": "Supprimer un utilisateur",
                 "operationId": "5b3871a272eb9213ad7b620141ece3d7",
                 "parameters": [
                     {
@@ -357,7 +1323,8 @@
                         "in": "path",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "string",
+                            "format": "uuid"
                         }
                     }
                 ],
@@ -379,11 +1346,55 @@
                     "Maman",
                     "Professionnel"
                 ],
-                "summary": "Liste grossesses",
+                "summary": "Lister les grossesses",
                 "operationId": "ad2253fc6eeff6aaf668c5e95d03bd1e",
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": [
+                                    {
+                                        "id": "a31d3b9a-5aa5-4e9f-9f66-9f48ff1d7f20",
+                                        "maman_id": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
+                                        "maman_nom": "Fatou Diop",
+                                        "date_debut": "2025-01-05",
+                                        "date_fin_prevue": "2025-10-12",
+                                        "semaine_grossesse": 10,
+                                        "nombre_grossesses_precedentes": 0,
+                                        "antecedents_medicaux": "",
+                                        "statut": "en_attente",
+                                        "professionnel_validateur": null,
+                                        "date_validation": null,
+                                        "trimestre": 1,
+                                        "notes": ""
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accès interdit",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Forbidden."
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -397,11 +1408,103 @@
                     "Maman",
                     "Professionnel"
                 ],
-                "summary": "Créer grossesse",
+                "summary": "Créer une grossesse",
                 "operationId": "9440193d4ff59b9dbf70f01958bf48bc",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "date_debut"
+                                ],
+                                "properties": {
+                                    "date_debut": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2026-03-28"
+                                    },
+                                    "date_fin_prevue": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2026-12-05",
+                                        "nullable": true
+                                    },
+                                    "nombre_grossesses_precedentes": {
+                                        "type": "integer",
+                                        "example": 0,
+                                        "nullable": true
+                                    },
+                                    "antecedents_medicaux": {
+                                        "type": "string",
+                                        "example": "",
+                                        "nullable": true
+                                    },
+                                    "notes": {
+                                        "type": "string",
+                                        "example": "Suivi initial",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "201": {
-                        "description": "Créé"
+                        "description": "Créé",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "id": "a31d3b9a-5aa5-4e9f-9f66-9f48ff1d7f20",
+                                    "maman_id": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
+                                    "date_debut": "2025-01-05",
+                                    "date_fin_prevue": "2025-10-12",
+                                    "statut": "en_attente",
+                                    "notes": "Suivi initial"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accès interdit",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Forbidden."
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erreur de validation",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Le formulaire contient des erreurs.",
+                                    "errors": {
+                                        "date_debut": [
+                                            "Le champ est requis."
+                                        ]
+                                    }
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -411,27 +1514,81 @@
                 ]
             }
         },
-        "/api/grossesses/{grossess}": {
+        "/api/grossesses/{grossesse}": {
             "get": {
                 "tags": [
                     "Maman",
                     "Professionnel"
                 ],
-                "summary": "Afficher grossesse",
-                "operationId": "76a4925cac300de6de7d9c4e275143bf",
+                "summary": "Afficher une grossesse",
+                "operationId": "141b049f33be866b727bf447119f8ed2",
                 "parameters": [
                     {
-                        "name": "grossess",
+                        "name": "grossesse",
                         "in": "path",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "string",
+                            "format": "uuid"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "id": "a31d3b9a-5aa5-4e9f-9f66-9f48ff1d7f20",
+                                    "maman_id": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
+                                    "maman_nom": "Fatou Diop",
+                                    "date_debut": "2025-01-05",
+                                    "date_fin_prevue": "2025-10-12",
+                                    "semaine_grossesse": 10,
+                                    "nombre_grossesses_precedentes": 0,
+                                    "antecedents_medicaux": "",
+                                    "statut": "en_attente",
+                                    "professionnel_validateur": null,
+                                    "date_validation": null,
+                                    "trimestre": 1,
+                                    "notes": ""
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accès interdit",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Forbidden."
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Non trouvé",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Grossesse introuvable."
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -445,21 +1602,81 @@
                     "Maman",
                     "Professionnel"
                 ],
-                "summary": "Mettre à jour grossesse",
-                "operationId": "f83a3a40e06d5b8e1eeef97c5731d30c",
+                "summary": "Mettre à jour une grossesse",
+                "operationId": "d7106603f633518962bdea5226cb66fa",
                 "parameters": [
                     {
-                        "name": "grossess",
+                        "name": "grossesse",
                         "in": "path",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "string",
+                            "format": "uuid"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Modifié"
+                        "description": "Modifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "id": "a31d3b9a-5aa5-4e9f-9f66-9f48ff1d7f20",
+                                    "maman_id": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
+                                    "statut": "validee"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accès interdit",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Forbidden."
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Non trouvé",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Grossesse introuvable."
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erreur de validation",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Le formulaire contient des erreurs.",
+                                    "errors": {
+                                        "date_fin_prevue": [
+                                            "Le champ doit être une date valide."
+                                        ]
+                                    }
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -473,21 +1690,65 @@
                     "Maman",
                     "Professionnel"
                 ],
-                "summary": "Mettre à jour partiellement grossesse",
-                "operationId": "46a82d00cfbe0f8379b56e67cbf3b74f",
+                "summary": "Mettre à jour partiellement une grossesse",
+                "operationId": "d7cdbb1f1fb58f3c5f2a06ca86926fc4",
                 "parameters": [
                     {
-                        "name": "grossess",
+                        "name": "grossesse",
                         "in": "path",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "string",
+                            "format": "uuid"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Modifié"
+                        "description": "Modifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "id": "a31d3b9a-5aa5-4e9f-9f66-9f48ff1d7f20",
+                                    "maman_id": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
+                                    "statut": "validee"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accès interdit",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Forbidden."
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Non trouvé",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Grossesse introuvable."
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -503,11 +1764,51 @@
                     "Maman",
                     "Professionnel"
                 ],
-                "summary": "Liste bébés",
+                "summary": "Lister les bébés",
                 "operationId": "925bc21dbe819a510320145df17ab2a4",
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": [
+                                    {
+                                        "id": "b5ad1fbe-2c58-4c2b-9a5d-9f6394f5db01",
+                                        "grossesse_id": "a31d3b9a-5aa5-4e9f-9f66-9f48ff1d7f20",
+                                        "maman_id": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
+                                        "nom": "Moussa Diallo",
+                                        "date_naissance": "2025-10-12",
+                                        "sexe": "M",
+                                        "poids": 3.1,
+                                        "taille": 49,
+                                        "groupe_sanguin": "O+"
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accès interdit",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Forbidden."
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -521,11 +1822,202 @@
                     "Maman",
                     "Professionnel"
                 ],
-                "summary": "Créer bébé",
+                "summary": "Créer un bébé",
                 "operationId": "75e35727187e984458c32baefd278906",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "maman_id",
+                                    "grossesse_id",
+                                    "nom",
+                                    "date_naissance",
+                                    "sexe"
+                                ],
+                                "properties": {
+                                    "maman_id": {
+                                        "type": "string",
+                                        "format": "uuid",
+                                        "example": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11"
+                                    },
+                                    "grossesse_id": {
+                                        "type": "string",
+                                        "format": "uuid",
+                                        "example": "a31d3b9a-5aa5-4e9f-9f66-9f48ff1d7f20"
+                                    },
+                                    "nom": {
+                                        "type": "string",
+                                        "example": "Moussa Diallo"
+                                    },
+                                    "date_naissance": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2026-03-28"
+                                    },
+                                    "sexe": {
+                                        "type": "string",
+                                        "example": "M"
+                                    },
+                                    "poids": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "nullable": true
+                                    },
+                                    "taille": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "nullable": true
+                                    },
+                                    "groupe_sanguin": {
+                                        "type": "string",
+                                        "example": "O+",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "201": {
-                        "description": "Créé"
+                        "description": "Créé",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "id": "b5ad1fbe-2c58-4c2b-9a5d-9f6394f5db01",
+                                    "maman_id": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
+                                    "grossesse_id": "a31d3b9a-5aa5-4e9f-9f66-9f48ff1d7f20",
+                                    "nom": "Moussa Diallo",
+                                    "date_naissance": "2025-10-12",
+                                    "sexe": "M",
+                                    "poids": 3.1,
+                                    "taille": 49,
+                                    "groupe_sanguin": "O+"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accès interdit",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Forbidden."
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erreur de validation",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Le formulaire contient des erreurs.",
+                                    "errors": {
+                                        "grossesse_id": [
+                                            "Le champ est requis."
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            }
+        },
+        "/api/bebes/{bebe}": {
+            "get": {
+                "tags": [
+                    "Maman",
+                    "Professionnel"
+                ],
+                "summary": "Afficher un bébé",
+                "operationId": "075adfdce7bf17edda60d28fb1e350ac",
+                "parameters": [
+                    {
+                        "name": "bebe",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "id": "b5ad1fbe-2c58-4c2b-9a5d-9f6394f5db01",
+                                    "grossesse_id": "a31d3b9a-5aa5-4e9f-9f66-9f48ff1d7f20",
+                                    "maman_id": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
+                                    "nom": "Moussa Diallo",
+                                    "date_naissance": "2025-10-12",
+                                    "sexe": "M",
+                                    "poids": 3.1,
+                                    "taille": 49,
+                                    "groupe_sanguin": "O+"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accès interdit",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Forbidden."
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Non trouvé",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Bébé introuvable."
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -540,11 +2032,54 @@
                 "tags": [
                     "Professionnel"
                 ],
-                "summary": "Liste consultations",
+                "summary": "Lister les consultations",
                 "operationId": "7b5b87faa0386103a87d31aa61f90939",
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": [
+                                    {
+                                        "id": "d1f0d0f1-4d0d-4a8d-b1f7-9d66e40e9c44",
+                                        "maman_id": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
+                                        "professionnel_id": "2fcb4f4f-7f18-4a44-9b53-b736f0af6d11",
+                                        "type": "Consultation prénatale",
+                                        "date": "2025-04-05",
+                                        "heure": "09:30:00",
+                                        "tension_arterielle": "12/8",
+                                        "poids": "68",
+                                        "hauteur_uterine": "28",
+                                        "bcf": "145",
+                                        "notes": "Contrôle routine",
+                                        "semaine_grossesse": 24
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accès interdit",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Forbidden."
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -557,11 +2092,142 @@
                 "tags": [
                     "Professionnel"
                 ],
-                "summary": "Créer consultation",
+                "summary": "Créer une consultation",
                 "operationId": "609b39305092b28f45bac34245698aec",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "maman_id",
+                                    "professionnel_id",
+                                    "date",
+                                    "heure",
+                                    "type"
+                                ],
+                                "properties": {
+                                    "maman_id": {
+                                        "type": "string",
+                                        "format": "uuid",
+                                        "example": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11"
+                                    },
+                                    "professionnel_id": {
+                                        "type": "string",
+                                        "format": "uuid",
+                                        "example": "2fcb4f4f-7f18-4a44-9b53-b736f0af6d11"
+                                    },
+                                    "date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2026-04-05"
+                                    },
+                                    "heure": {
+                                        "type": "string",
+                                        "example": "09:30:00"
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "example": "Consultation prénatale"
+                                    },
+                                    "tension_arterielle": {
+                                        "type": "string",
+                                        "example": "12/8",
+                                        "nullable": true
+                                    },
+                                    "poids": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 68,
+                                        "nullable": true
+                                    },
+                                    "hauteur_uterine": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 28,
+                                        "nullable": true
+                                    },
+                                    "bcf": {
+                                        "type": "string",
+                                        "example": "145",
+                                        "nullable": true
+                                    },
+                                    "semaine_grossesse": {
+                                        "type": "integer",
+                                        "example": 24,
+                                        "nullable": true
+                                    },
+                                    "notes": {
+                                        "type": "string",
+                                        "example": "Contrôle routine",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "201": {
-                        "description": "Créé"
+                        "description": "Créé",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "id": "e9a5b0a8-4b2a-4f6e-a9fa-0fae5e92d110",
+                                    "maman_id": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
+                                    "professionnel_id": "2fcb4f4f-7f18-4a44-9b53-b736f0af6d11",
+                                    "date": "2025-04-05",
+                                    "heure": "09:30:00",
+                                    "type": "Consultation de suivi",
+                                    "notes": "Tension stable",
+                                    "tension_arterielle": "12/8",
+                                    "poids": "68",
+                                    "hauteur_uterine": "28",
+                                    "bcf": "145",
+                                    "semaine_grossesse": 24
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accès interdit",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Forbidden."
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erreur de validation",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Le formulaire contient des erreurs.",
+                                    "errors": {
+                                        "maman_id": [
+                                            "Le champ est requis."
+                                        ]
+                                    }
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -576,7 +2242,7 @@
                 "tags": [
                     "Professionnel"
                 ],
-                "summary": "Afficher consultation",
+                "summary": "Afficher une consultation",
                 "operationId": "5e6bfeb721b7674d411c53733fe31463",
                 "parameters": [
                     {
@@ -584,13 +2250,68 @@
                         "in": "path",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "string",
+                            "format": "uuid"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": [
+                                    {
+                                        "id": "d1f0d0f1-4d0d-4a8d-b1f7-9d66e40e9c44",
+                                        "maman_id": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
+                                        "professionnel_id": "2fcb4f4f-7f18-4a44-9b53-b736f0af6d11",
+                                        "type": "Consultation prénatale",
+                                        "date": "2025-04-05",
+                                        "heure": "09:30:00",
+                                        "tension_arterielle": "12/8",
+                                        "poids": "68",
+                                        "hauteur_uterine": "28",
+                                        "bcf": "145",
+                                        "notes": "Contrôle routine",
+                                        "semaine_grossesse": 24
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accès interdit",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Forbidden."
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Non trouvé",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Consultation introuvable."
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -603,7 +2324,7 @@
                 "tags": [
                     "Professionnel"
                 ],
-                "summary": "Mettre à jour consultation",
+                "summary": "Mettre à jour une consultation",
                 "operationId": "566185320109b50ac9b785527e896a63",
                 "parameters": [
                     {
@@ -611,13 +2332,57 @@
                         "in": "path",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "string",
+                            "format": "uuid"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Modifié"
+                        "description": "Modifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "id": "e9a5b0a8-4b2a-4f6e-a9fa-0fae5e92d110",
+                                    "notes": "Évolution favorable",
+                                    "poids": "68.5"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accès interdit",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Forbidden."
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Non trouvé",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Consultation introuvable."
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -633,11 +2398,50 @@
                     "Maman",
                     "Professionnel"
                 ],
-                "summary": "Liste vaccinations",
+                "summary": "Lister les vaccinations",
                 "operationId": "d0790e4093738da8cddef97fbe03a4b3",
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": [
+                                    {
+                                        "id": "6e1b4b57-8a12-45ce-a5e1-6de8e9a21c11",
+                                        "bebe_id": "b5ad1fbe-2c58-4c2b-9a5d-9f6394f5db01",
+                                        "nom_vaccin": "BCG",
+                                        "age": "À la naissance",
+                                        "date_vaccination": "2025-03-15",
+                                        "prochaine_dose": null,
+                                        "notes": "",
+                                        "professionnel_id": "2fcb4f4f-7f18-4a44-9b53-b736f0af6d11"
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accès interdit",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Forbidden."
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -651,11 +2455,109 @@
                     "Maman",
                     "Professionnel"
                 ],
-                "summary": "Créer vaccination",
+                "summary": "Créer une vaccination",
                 "operationId": "c8e0feb2a5fe5ae309444618e387b16c",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "bebe_id",
+                                    "nom_vaccin",
+                                    "date_vaccination"
+                                ],
+                                "properties": {
+                                    "bebe_id": {
+                                        "type": "string",
+                                        "format": "uuid",
+                                        "example": "b5ad1fbe-2c58-4c2b-9a5d-9f6394f5db01"
+                                    },
+                                    "nom_vaccin": {
+                                        "type": "string",
+                                        "example": "BCG"
+                                    },
+                                    "age": {
+                                        "type": "string",
+                                        "example": "À la naissance",
+                                        "nullable": true
+                                    },
+                                    "date_vaccination": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2026-03-28"
+                                    },
+                                    "prochaine_dose": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "nullable": true
+                                    },
+                                    "notes": {
+                                        "type": "string",
+                                        "example": "Administré à la maternité",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "201": {
-                        "description": "Créé"
+                        "description": "Créé",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "id": "2c9c2bb4-41c7-4a70-b8c9-41f92f6e33d1",
+                                    "bebe_id": "b5ad1fbe-2c58-4c2b-9a5d-9f6394f5db01",
+                                    "nom_vaccin": "BCG",
+                                    "date_vaccination": "2025-03-15",
+                                    "prochaine_dose": null,
+                                    "notes": "Administré à la maternité",
+                                    "professionnel_id": "2fcb4f4f-7f18-4a44-9b53-b736f0af6d11"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accès interdit",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Forbidden."
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erreur de validation",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Le formulaire contient des erreurs.",
+                                    "errors": {
+                                        "bebe_id": [
+                                            "Le champ est requis."
+                                        ]
+                                    }
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -666,12 +2568,89 @@
             }
         },
         "/api/vaccinations/{vaccination}": {
+            "get": {
+                "tags": [
+                    "Maman",
+                    "Professionnel"
+                ],
+                "summary": "Afficher une vaccination",
+                "operationId": "726d160eb3ff05aa99b84bff5650a9dc",
+                "parameters": [
+                    {
+                        "name": "vaccination",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "id": "6e1b4b57-8a12-45ce-a5e1-6de8e9a21c11",
+                                    "bebe_id": "b5ad1fbe-2c58-4c2b-9a5d-9f6394f5db01",
+                                    "nom_vaccin": "BCG",
+                                    "age": "À la naissance",
+                                    "date_vaccination": "2025-03-15",
+                                    "prochaine_dose": null,
+                                    "notes": "",
+                                    "professionnel_id": "2fcb4f4f-7f18-4a44-9b53-b736f0af6d11"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accès interdit",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Forbidden."
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Non trouvé",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Vaccination introuvable."
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            },
             "patch": {
                 "tags": [
                     "Maman",
                     "Professionnel"
                 ],
-                "summary": "Mettre à jour vaccination",
+                "summary": "Mettre à jour une vaccination",
                 "operationId": "afe53db655419f1314a0a3dd9de97cff",
                 "parameters": [
                     {
@@ -679,13 +2658,58 @@
                         "in": "path",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "string",
+                            "format": "uuid"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Modifié"
+                        "description": "Modifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "id": "2c9c2bb4-41c7-4a70-b8c9-41f92f6e33d1",
+                                    "bebe_id": "b5ad1fbe-2c58-4c2b-9a5d-9f6394f5db01",
+                                    "nom_vaccin": "BCG",
+                                    "date_vaccination": "2025-03-15"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accès interdit",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Forbidden."
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Non trouvé",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Vaccination introuvable."
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -700,11 +2724,415 @@
                 "tags": [
                     "Maman"
                 ],
-                "summary": "Liste rendez-vous",
+                "summary": "Lister les rendez-vous",
                 "operationId": "0622b96c4bf23983de0471f45a58e1f1",
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": [
+                                    {
+                                        "id": "5d3a8d33-0b6b-4f5f-9f85-2a2a8d4c7c11",
+                                        "maman_id": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
+                                        "grossesse_id": "a31d3b9a-5aa5-4e9f-9f66-9f48ff1d7f20",
+                                        "type": "Consultation prénatale",
+                                        "motif": "Suivi mensuel",
+                                        "date": "2025-04-20",
+                                        "heure": "14:00",
+                                        "professionnel_id": "2fcb4f4f-7f18-4a44-9b53-b736f0af6d11",
+                                        "professionnel": "Dr. Fatou Sow",
+                                        "lieu": "Hôpital Principal de Dakar",
+                                        "statut": "prévu",
+                                        "notes": ""
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Maman"
+                ],
+                "summary": "Créer un rendez-vous",
+                "operationId": "7b48340b8bc3514302c28b23aa664966",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "grossesse_id",
+                                    "type",
+                                    "motif",
+                                    "date",
+                                    "heure",
+                                    "professionnel_id",
+                                    "lieu"
+                                ],
+                                "properties": {
+                                    "grossesse_id": {
+                                        "type": "string",
+                                        "format": "uuid",
+                                        "example": "a31d3b9a-5aa5-4e9f-9f66-9f48ff1d7f20"
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "example": "Consultation prénatale"
+                                    },
+                                    "motif": {
+                                        "type": "string",
+                                        "example": "Suivi mensuel"
+                                    },
+                                    "date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2026-04-20"
+                                    },
+                                    "heure": {
+                                        "type": "string",
+                                        "example": "14:00"
+                                    },
+                                    "professionnel_id": {
+                                        "type": "string",
+                                        "format": "uuid",
+                                        "example": "2fcb4f4f-7f18-4a44-9b53-b736f0af6d11"
+                                    },
+                                    "lieu": {
+                                        "type": "string",
+                                        "example": "Hôpital Principal de Dakar"
+                                    },
+                                    "notes": {
+                                        "type": "string",
+                                        "example": "",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Créé",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "id": "5d3a8d33-0b6b-4f5f-9f85-2a2a8d4c7c11",
+                                    "maman_id": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
+                                    "grossesse_id": "a31d3b9a-5aa5-4e9f-9f66-9f48ff1d7f20",
+                                    "type": "Consultation prénatale",
+                                    "motif": "Suivi mensuel",
+                                    "date": "2025-04-20",
+                                    "heure": "14:00",
+                                    "professionnel_id": "2fcb4f4f-7f18-4a44-9b53-b736f0af6d11",
+                                    "lieu": "Hôpital Principal de Dakar",
+                                    "statut": "prévu",
+                                    "notes": ""
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accès interdit",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Forbidden."
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erreur de validation",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Le formulaire contient des erreurs.",
+                                    "errors": {
+                                        "grossesse_id": [
+                                            "Le champ est requis."
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            }
+        },
+        "/api/familles/{uuid}": {
+            "get": {
+                "tags": [
+                    "Famille"
+                ],
+                "summary": "Afficher le dossier familial",
+                "operationId": "656f2fe2796a3d1897c0414ee090129f",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "id": "FAM-001",
+                                    "maman_id": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
+                                    "est_gemellaire": false,
+                                    "membres": [
+                                        {
+                                            "id": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
+                                            "type": "maman",
+                                            "lien": "mere",
+                                            "nom": "Fatou Diop",
+                                            "est_actif": true
+                                        },
+                                        {
+                                            "id": "b5ad1fbe-2c58-4c2b-9a5d-9f6394f5db01",
+                                            "type": "bebe",
+                                            "lien": "fille",
+                                            "nom": "Aminata Jr Diallo",
+                                            "est_actif": true
+                                        }
+                                    ],
+                                    "grossesses": [
+                                        {
+                                            "id": "a31d3b9a-5aa5-4e9f-9f66-9f48ff1d7f20",
+                                            "maman_id": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
+                                            "statut": "validee"
+                                        }
+                                    ],
+                                    "bebes": [
+                                        {
+                                            "id": "b5ad1fbe-2c58-4c2b-9a5d-9f6394f5db01",
+                                            "maman_id": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
+                                            "nom": "Aminata Jr Diallo"
+                                        }
+                                    ],
+                                    "consultations": [],
+                                    "vaccinations": [],
+                                    "rendez_vous": []
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Non trouvé",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Famille introuvable."
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            }
+        },
+        "/api/familles/{uuid}/maman": {
+            "get": {
+                "tags": [
+                    "Famille"
+                ],
+                "summary": "Bloc maman du dossier",
+                "operationId": "f2e72b88bd86f9bb4508618693451821",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "maman": {
+                                        "id": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
+                                        "nom": "Fatou Diop",
+                                        "email": "fatou.diop@email.com",
+                                        "telephone": "+221 77 123 45 67"
+                                    },
+                                    "grossesse": {
+                                        "id": "a31d3b9a-5aa5-4e9f-9f66-9f48ff1d7f20",
+                                        "statut": "validee"
+                                    },
+                                    "consultations": [],
+                                    "rendez_vous": []
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Non trouvé",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Famille introuvable."
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            }
+        },
+        "/api/familles/{uuid}/bebes/{bebeUuid}": {
+            "get": {
+                "tags": [
+                    "Famille"
+                ],
+                "summary": "Bloc bébé du dossier",
+                "operationId": "921be3467322f0cd5932a6fb92d40d8a",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "bebeUuid",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "bebe": {
+                                        "id": "b5ad1fbe-2c58-4c2b-9a5d-9f6394f5db01",
+                                        "nom": "Aminata Jr Diallo",
+                                        "date_naissance": "2025-03-15",
+                                        "sexe": "F"
+                                    },
+                                    "vaccinations": [],
+                                    "croissance": []
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Non trouvé",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Bébé introuvable."
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -717,9 +3145,9 @@
         "/api/scans/resolve": {
             "post": {
                 "tags": [
-                    "Professionnel"
+                    "Scan"
                 ],
-                "summary": "Résoudre un code QR en dossier patient",
+                "summary": "Résoudre un QR code vers un patient",
                 "operationId": "2fdc7d37926e16994bccfe291313ea02",
                 "requestBody": {
                     "required": true,
@@ -732,7 +3160,7 @@
                                 "properties": {
                                     "qr_code": {
                                         "type": "string",
-                                        "example": "p-1"
+                                        "example": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11"
                                     }
                                 },
                                 "type": "object"
@@ -742,13 +3170,63 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Patient trouvé"
+                        "description": "Patient trouvé",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "type": "grossesse",
+                                    "patient": {
+                                        "id": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
+                                        "nom": "Fatou Diop",
+                                        "telephone": "+221 77 123 45 67"
+                                    },
+                                    "grossesse": {
+                                        "id": "a31d3b9a-5aa5-4e9f-9f66-9f48ff1d7f20",
+                                        "maman_id": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
+                                        "statut": "validee"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
                     },
                     "404": {
-                        "description": "Patient non trouvé"
+                        "description": "Patient non trouvé",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Patient introuvable"
+                                }
+                            }
+                        }
                     },
                     "422": {
-                        "description": "Erreur de validation"
+                        "description": "Erreur de validation",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Le champ qr_code est obligatoire.",
+                                    "errors": {
+                                        "qr_code": [
+                                            "Le champ est requis"
+                                        ]
+                                    }
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -774,16 +3252,19 @@
             "name": "Auth"
         },
         {
-            "name": "Admin",
-            "description": "Endpoints de gestion administrateur"
+            "name": "Admin"
         },
         {
-            "name": "Maman",
-            "description": "Endpoints pour le parcours maman"
+            "name": "Maman"
         },
         {
-            "name": "Professionnel",
-            "description": "Endpoints pour le parcours professionnel de santé"
+            "name": "Professionnel"
+        },
+        {
+            "name": "Famille"
+        },
+        {
+            "name": "Scan"
         }
     ],
     "security": [

@@ -32,6 +32,8 @@ Route::middleware('auth:api')->group(function (): void {
     Route::put('auth/profile', [AuthController::class, 'updateMe']);
     Route::post('auth/change-password', [AuthController::class, 'changePassword']);
     Route::patch('auth/password', [AuthController::class, 'changePassword']);
+    Route::post('auth/professional/documents', [AuthController::class, 'uploadProfessionalDocuments'])
+        ->middleware('role:professionnel');
 
     // Admin (aligné avec le front)
     Route::prefix('admin')->middleware('role:admin')->group(function (): void {

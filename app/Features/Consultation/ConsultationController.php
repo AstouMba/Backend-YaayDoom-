@@ -18,7 +18,7 @@ class ConsultationController extends Controller
     public function index(): JsonResponse
     {
         $consultations = $this->consultationService->getAll();
-        return response()->json($consultations->map(fn ($consultation) => $consultation->toContractArray())->values());
+        return response()->json($consultations->map(fn ($consultation) => ConsultationPresenter::contract($consultation))->values());
     }
 
     /**
@@ -27,7 +27,7 @@ class ConsultationController extends Controller
     public function show(string $id): JsonResponse
     {
         $consultation = $this->consultationService->get($id);
-        return response()->json($consultation->toContractArray());
+        return response()->json(ConsultationPresenter::contract($consultation));
     }
 
     /**
@@ -36,7 +36,7 @@ class ConsultationController extends Controller
     public function store(Request $request): JsonResponse
     {
         $consultation = $this->consultationService->create(ConsultationValidator::store($request->all()));
-        return response()->json($consultation->toContractArray(), 201);
+        return response()->json(ConsultationPresenter::contract($consultation), 201);
     }
 
     /**
@@ -45,7 +45,7 @@ class ConsultationController extends Controller
     public function update(Request $request, string $id): JsonResponse
     {
         $consultation = $this->consultationService->update($id, ConsultationValidator::update($request->all()));
-        return response()->json($consultation->toContractArray());
+        return response()->json(ConsultationPresenter::contract($consultation));
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace App\Features\Admin;
 
+use App\Features\User\UserPresenter;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -20,7 +21,7 @@ class AdminController extends Controller
     {
         $admins = $this->adminService->getAll();
 
-        return response()->json($admins);
+        return response()->json($admins->map(fn (User $admin) => UserPresenter::admin($admin))->values());
     }
 
     /**
@@ -30,7 +31,7 @@ class AdminController extends Controller
     {
         $admin = $this->adminService->get($id);
 
-        return response()->json($admin);
+        return response()->json(UserPresenter::admin($admin));
     }
 
     /**
@@ -40,7 +41,7 @@ class AdminController extends Controller
     {
         $admin = $this->adminService->create(AdminValidator::store($request->all()));
 
-        return response()->json($admin, 201);
+        return response()->json(UserPresenter::admin($admin), 201);
     }
 
     /**
@@ -50,7 +51,7 @@ class AdminController extends Controller
     {
         $admin = $this->adminService->update($id, AdminValidator::update($request->all(), $id));
 
-        return response()->json($admin);
+        return response()->json(UserPresenter::admin($admin));
     }
 
     /**
@@ -98,17 +99,20 @@ class AdminController extends Controller
     /**
      * Valider un professionnel
      */
-    public function approveProfessionnel(User $user): JsonResponse
+    public function approveProfessionnel(Request $request, User $user): JsonResponse
     {
         if ($user->role !== 'professionnel') {
             return response()->json(['message' => 'Cet utilisateur n\'est pas un professionnel'], 422);
         }
 
-        $updated = $this->adminService->approveProfessionnel($user);
+        $validated = AdminValidator::approve($request->all());
+        $updated = $this->adminService->approveProfessionnel($user, $validated['motif'], $request->user());
 
         return response()->json([
             'success' => true,
             'message' => 'Professionnel approuvé',
+            'motif' => $validated['motif'],
+            'professionnel' => UserPresenter::admin($updated),
         ]);
     }
 
@@ -118,12 +122,13 @@ class AdminController extends Controller
     public function rejectProfessionnel(Request $request, User $user): JsonResponse
     {
         $validated = AdminValidator::reject($request->all());
-        $updated = $this->adminService->rejectProfessionnel($user, $validated['motif'] ?? null);
+        $updated = $this->adminService->rejectProfessionnel($user, $validated['motif'], $request->user());
 
         return response()->json([
             'success' => true,
             'message' => 'Demande rejetée',
-            'motif' => $request->input('motif'),
+            'motif' => $validated['motif'],
+            'professionnel' => UserPresenter::admin($updated),
         ]);
     }
 

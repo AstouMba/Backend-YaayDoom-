@@ -18,7 +18,7 @@ class BebeController extends Controller
     public function index(): JsonResponse
     {
         $bebes = $this->bebeService->getAll();
-        return response()->json($bebes->map(fn ($bebe) => $bebe->toContractArray())->values());
+        return response()->json($bebes->map(fn ($bebe) => BebePresenter::contract($bebe))->values());
     }
 
     /**
@@ -27,7 +27,7 @@ class BebeController extends Controller
     public function show(string $id): JsonResponse
     {
         $bebe = $this->bebeService->get($id);
-        return response()->json($bebe->toContractArray());
+        return response()->json(BebePresenter::contract($bebe));
     }
 
     /**
@@ -36,7 +36,7 @@ class BebeController extends Controller
     public function store(Request $request): JsonResponse
     {
         $bebe = $this->bebeService->create(BebeValidator::store($request->all()));
-        return response()->json($bebe->toContractArray(), 201);
+        return response()->json(BebePresenter::contract($bebe), 201);
     }
 
     /**
@@ -45,7 +45,7 @@ class BebeController extends Controller
     public function update(Request $request, string $id): JsonResponse
     {
         $bebe = $this->bebeService->update($id, BebeValidator::update($request->all()));
-        return response()->json($bebe->toContractArray());
+        return response()->json(BebePresenter::contract($bebe));
     }
 
     /**

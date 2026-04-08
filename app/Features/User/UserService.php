@@ -2,35 +2,37 @@
 
 namespace App\Features\User;
 
+use App\Application\User\CreateUser;
+use App\Application\User\DeleteUser;
+use App\Application\User\DTO\CreateUserData;
+use App\Application\User\DTO\UpdateUserData;
+use App\Application\User\FindUserByEmail;
+use App\Application\User\FindUsersByRole;
+use App\Application\User\GetUser;
+use App\Application\User\ListUsers;
+use App\Application\User\UpdateUser;
 use App\Models\User;
 use App\Services\Service;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Hash;
 
 class UserService extends Service
 {
+    public function __construct(
+        private CreateUser $createUser,
+        private GetUser $getUser,
+        private ListUsers $listUsers,
+        private UpdateUser $updateUser,
+        private DeleteUser $deleteUser,
+        private FindUserByEmail $findUserByEmail,
+        private FindUsersByRole $findUsersByRole,
+    ) {}
+
     /**
      * Créer un nouvel utilisateur
      */
     public function create(array $data): User
     {
-        $data['name'] = $data['name'] ?? $data['nom'] ?? null;
-        $data['phone'] = $data['phone'] ?? $data['telephone'] ?? null;
-        $data['status'] = $data['status'] ?? $data['statut'] ?? 'actif';
-
-        return User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'phone' => $data['phone'] ?? null,
-            'password' => Hash::make($data['password']),
-            'role' => $data['role'] ?? 'user',
-            'status' => $data['status'],
-            'is_validated' => $data['is_validated'] ?? true,
-            'specialite' => $data['specialite'] ?? null,
-            'matricule' => $data['matricule'] ?? null,
-            'centre_de_sante' => $data['centre_de_sante'] ?? null,
-            'rejection_reason' => $data['rejection_reason'] ?? null,
-        ]);
+        return $this->createUser->execute(CreateUserData::fromArray($data));
     }
 
     /**
@@ -38,13 +40,7 @@ class UserService extends Service
      */
     public function get(string $id): ?User
     {
-        $user = User::find($id);
-
-        if (!$user) {
-            $this->notFound('user_not_found');
-        }
-
-        return $user;
+        return $this->getUser->execute($id);
     }
 
     /**
@@ -52,7 +48,7 @@ class UserService extends Service
      */
     public function getAll(): Collection
     {
-        return User::all();
+        return $this->listUsers->execute();
     }
 
     /**
@@ -60,55 +56,7 @@ class UserService extends Service
      */
     public function update(string $id, array $data): ?User
     {
-        $user = User::find($id);
-
-        if (!$user) {
-            $this->notFound('user_not_found');
-        }
-
-        $data['name'] = $data['name'] ?? $data['nom'] ?? $user->name;
-        $data['phone'] = $data['phone'] ?? $data['telephone'] ?? $user->phone;
-        $data['status'] = $data['status'] ?? $data['statut'] ?? $user->status;
-
-        $user->name = $data['name'];
-        $user->email = $data['email'] ?? $user->email;
-        $user->phone = $data['phone'];
-
-        if (isset($data['password'])) {
-            $user->password = Hash::make($data['password']);
-        }
-
-        if (isset($data['role'])) {
-            $user->role = $data['role'];
-        }
-
-        if (isset($data['status'])) {
-            $user->status = $data['status'];
-        }
-
-        if (array_key_exists('is_validated', $data)) {
-            $user->is_validated = (bool) $data['is_validated'];
-        }
-
-        if (array_key_exists('specialite', $data)) {
-            $user->specialite = $data['specialite'];
-        }
-
-        if (array_key_exists('matricule', $data)) {
-            $user->matricule = $data['matricule'];
-        }
-
-        if (array_key_exists('centre_de_sante', $data)) {
-            $user->centre_de_sante = $data['centre_de_sante'];
-        }
-
-        if (array_key_exists('rejection_reason', $data)) {
-            $user->rejection_reason = $data['rejection_reason'];
-        }
-
-        $user->save();
-
-        return $user;
+        return $this->updateUser->execute($id, UpdateUserData::fromArray($data));
     }
 
     /**
@@ -116,13 +64,7 @@ class UserService extends Service
      */
     public function delete(string $id): bool
     {
-        $user = User::find($id);
-
-        if (!$user) {
-            $this->notFound('user_not_found');
-        }
-
-        return $user->delete();
+        return $this->deleteUser->execute($id);
     }
 
     /**
@@ -130,7 +72,7 @@ class UserService extends Service
      */
     public function findByEmail(string $email): ?User
     {
-        return User::where('email', $email)->first();
+        return $this->findUserByEmail->execute($email);
     }
 
     /**
@@ -138,6 +80,6 @@ class UserService extends Service
      */
     public function findByRole(string $role): Collection
     {
-        return User::where('role', $role)->get();
+        return $this->findUsersByRole->execute($role);
     }
 }

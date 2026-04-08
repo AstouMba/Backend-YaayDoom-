@@ -39,6 +39,7 @@ class User extends Authenticatable
         'name',
         'email',
         'phone',
+        'birth_date',
         'password',
         'role',
         'is_validated',
@@ -47,6 +48,11 @@ class User extends Authenticatable
         'matricule',
         'centre_de_sante',
         'rejection_reason',
+        'verification_documents',
+        'decision_status',
+        'decision_motif',
+        'decision_date',
+        'decision_by',
     ];
 
     /**
@@ -68,34 +74,11 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'birth_date' => 'date',
             'password' => 'hashed',
             'is_validated' => 'boolean',
-        ];
-    }
-
-    /**
-     * Format contractuel exposé au frontend.
-     *
-     * @return array<string, mixed>
-     */
-    public function toContractArray(): array
-    {
-        return [
-            'id' => $this->id,
-            'nom' => $this->name,
-            'email' => $this->email,
-            'telephone' => $this->phone,
-            'role' => $this->role,
-            'specialite' => $this->specialite,
-            'matricule' => $this->matricule,
-            'centre_de_sante' => $this->centre_de_sante,
-            'centreDesante' => $this->centre_de_sante,
-            'is_validated' => (bool) $this->is_validated,
-            'isValidated' => (bool) $this->is_validated,
-            'statut' => $this->status,
-            'status' => $this->status,
-            'date_inscription' => optional($this->created_at)?->format('Y-m-d'),
-            'dateInscription' => optional($this->created_at)?->format('Y-m-d'),
+            'verification_documents' => 'array',
+            'decision_date' => 'datetime',
         ];
     }
 

@@ -2,6 +2,13 @@
 
 namespace App\Features\Grossesse;
 
+use App\Application\Grossesse\CreateGrossesse;
+use App\Application\Grossesse\DeleteGrossesse;
+use App\Application\Grossesse\DTO\CreateGrossesseData;
+use App\Application\Grossesse\DTO\UpdateGrossesseData;
+use App\Application\Grossesse\GetGrossesse;
+use App\Application\Grossesse\ListGrossesses;
+use App\Application\Grossesse\UpdateGrossesse;
 use App\Models\Grossesse;
 use App\Models\User;
 use App\Services\Service;
@@ -9,12 +16,20 @@ use Illuminate\Database\Eloquent\Collection;
 
 class GrossesseService extends Service
 {
+    public function __construct(
+        private ListGrossesses $listGrossesses,
+        private GetGrossesse $getGrossesse,
+        private CreateGrossesse $createGrossesse,
+        private UpdateGrossesse $updateGrossesse,
+        private DeleteGrossesse $deleteGrossesse,
+    ) {}
+
     /**
      * Récupérer toutes les grossesses
      */
     public function getAll(): Collection
     {
-        return Grossesse::all();
+        return $this->listGrossesses->execute();
     }
 
     /**
@@ -22,13 +37,7 @@ class GrossesseService extends Service
      */
     public function get(string $id): ?Grossesse
     {
-        $grossesse = Grossesse::find($id);
-
-        if (!$grossesse) {
-            $this->notFound('grossesse_not_found');
-        }
-
-        return $grossesse;
+        return $this->getGrossesse->execute($id);
     }
 
     /**
@@ -36,16 +45,12 @@ class GrossesseService extends Service
      */
     public function create(array $data, ?User $user = null): Grossesse
     {
-        if (!$user) {
-            $this->unauthorized();
-        }
+        $data['statut'] = $data['statut'] ?? 'en_attente';
 
-        $data['maman_id'] = $user->id;
-        $data['statut'] = 'en_attente';
-        $data['nombre_grossesses_precedentes'] = $data['nombre_grossesses_precedentes'] ?? 0;
-        $data['trimestre'] = $data['trimestre'] ?? 1;
-
-        return Grossesse::create($data);
+        return $this->createGrossesse->execute(
+            CreateGrossesseData::fromArray($data),
+            $user
+        );
     }
 
     /**
@@ -53,15 +58,7 @@ class GrossesseService extends Service
      */
     public function update(string $id, array $data): ?Grossesse
     {
-        $grossesse = Grossesse::find($id);
-        
-        if (!$grossesse) {
-            $this->notFound('grossesse_not_found');
-        }
-
-        $grossesse->update($data);
-        
-        return $grossesse;
+        return $this->updateGrossesse->execute($id, UpdateGrossesseData::fromArray($data));
     }
 
     /**
@@ -69,12 +66,6 @@ class GrossesseService extends Service
      */
     public function delete(string $id): bool
     {
-        $grossesse = Grossesse::find($id);
-        
-        if (!$grossesse) {
-            $this->notFound('grossesse_not_found');
-        }
-
-        return $grossesse->delete();
+        return $this->deleteGrossesse->execute($id);
     }
 }

@@ -3,9 +3,9 @@
 namespace App\Features\Vaccination;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class VaccinationController extends Controller
 {
@@ -21,7 +21,7 @@ class VaccinationController extends Controller
         $vaccinations = $this->vaccinationService->getAll();
         return response()->json($vaccinations->map(function ($vaccination) {
             $vaccination->loadMissing('bebe');
-            return $vaccination->toContractArray();
+            return VaccinationPresenter::contract($vaccination);
         })->values());
     }
 
@@ -33,7 +33,7 @@ class VaccinationController extends Controller
         $vaccination = $this->vaccinationService->get($id);
         $vaccination->loadMissing('bebe');
 
-        return response()->json($vaccination->toContractArray());
+        return response()->json(VaccinationPresenter::contract($vaccination));
     }
 
     /**
@@ -45,7 +45,7 @@ class VaccinationController extends Controller
             'professionnel_id' => Auth::id(),
         ]));
         $vaccination->loadMissing('bebe');
-        return response()->json($vaccination->toContractArray(), 201);
+        return response()->json(VaccinationPresenter::contract($vaccination), 201);
     }
 
     /**
@@ -56,7 +56,7 @@ class VaccinationController extends Controller
         $vaccination = $this->vaccinationService->update($id, VaccinationValidator::update($request->all()));
         $vaccination->loadMissing('bebe');
 
-        return response()->json($vaccination->toContractArray());
+        return response()->json(VaccinationPresenter::contract($vaccination));
     }
 
     /**

@@ -58,7 +58,17 @@ class AdminValidator
     public static function reject(array $data): array
     {
         return Validator::make($data, [
-            'motif' => 'nullable|string|max:500',
+            'motif' => 'required|string|max:500',
+        ])->validate();
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public static function approve(array $data): array
+    {
+        return Validator::make($data, [
+            'motif' => 'required|string|max:500',
         ])->validate();
     }
 }

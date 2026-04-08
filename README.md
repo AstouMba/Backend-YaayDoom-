@@ -32,8 +32,11 @@ Le projet expose une API securisee par token via Laravel Passport, avec document
 ## Fonctionnalites
 
 - Authentification:
-  - inscription
-  - connexion
+  - inscription maman en une étape
+  - inscription professionnel en plusieurs étapes avec validation admin
+  - connexion de la maman par téléphone
+  - connexion du professionnel et de l'admin par email
+  - upload des documents médicaux du professionnel
   - deconnexion
   - consultation du profil connecte
   - mise a jour du profil
@@ -161,6 +164,7 @@ Les seeders ajoutent des comptes de demonstration directement utilisables.
 | Professionnel en attente | `pro.enattente@demo.com` | `demo1234` |
 
 Le compte `pro.enattente@demo.com` est cree avec `is_validated = false`.
+La maman de demo peut aussi se connecter avec son telephone `+221771234567`.
 
 ## Lancer le projet
 
@@ -195,6 +199,9 @@ L'API est exposee sous le prefixe `/api`.
 - `GET /api/auth/me`
 - `PATCH /api/auth/me`
 - `POST /api/auth/change-password`
+- `POST /api/auth/professional/documents`
+
+Les documents de validation du professionnel sont stockés dans `storage/app/public/professionnels/...` et exposés via une URL publique dans le contrat API. Le front peut envoyer plusieurs fichiers avec le champ `documents[]`.
 
 ### Administration
 
@@ -203,13 +210,15 @@ Accessibles uniquement pour les utilisateurs ayant le role `admin`.
 - `GET /api/admin/users`
 - `GET /api/admin/stats`
 - `GET /api/admin/professionnels/pending`
-- `POST /api/admin/professionnels/{user}/approve`
-- `POST /api/admin/professionnels/{user}/reject`
+- `POST /api/admin/professionnels/{user}/approve` avec `{ "motif": "Documents conformes" }`
+- `POST /api/admin/professionnels/{user}/reject` avec `{ "motif": "Document incomplet" }`
 - `PATCH /api/admin/users/{user}/role`
 - `PATCH /api/admin/users/{user}/status`
 - `GET /api/users/{user}`
 - `PUT /api/users/{user}`
 - `DELETE /api/users/{user}`
+
+Les fiches admin d'un professionnel renvoient maintenant aussi `decisionStatus`, `decisionMotif`, `decisionDate`, `decisionBy`, ainsi que les documents de vérification.
 
 ### Parcours metier
 

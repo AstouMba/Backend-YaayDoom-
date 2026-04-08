@@ -2,6 +2,13 @@
 
 namespace App\Features\RendezVous;
 
+use App\Application\RendezVous\CreateRendezVous;
+use App\Application\RendezVous\DeleteRendezVous;
+use App\Application\RendezVous\DTO\CreateRendezVousData;
+use App\Application\RendezVous\DTO\UpdateRendezVousData;
+use App\Application\RendezVous\GetRendezVous;
+use App\Application\RendezVous\ListRendezVous;
+use App\Application\RendezVous\UpdateRendezVous;
 use App\Models\Grossesse;
 use App\Models\RendezVous;
 use App\Services\Service;
@@ -9,12 +16,20 @@ use Illuminate\Database\Eloquent\Collection;
 
 class RendezVousService extends Service
 {
+    public function __construct(
+        private ListRendezVous $listRendezVous,
+        private GetRendezVous $getRendezVous,
+        private CreateRendezVous $createRendezVous,
+        private UpdateRendezVous $updateRendezVous,
+        private DeleteRendezVous $deleteRendezVous,
+    ) {}
+
     /**
      * Récupérer tous les rendez-vous
      */
     public function getAll(): Collection
     {
-        return RendezVous::all();
+        return $this->listRendezVous->execute();
     }
 
     /**
@@ -22,13 +37,7 @@ class RendezVousService extends Service
      */
     public function get(string $id): ?RendezVous
     {
-        $rendezVous = RendezVous::find($id);
-
-        if (!$rendezVous) {
-            $this->notFound('rendez_vous_not_found');
-        }
-
-        return $rendezVous;
+        return $this->getRendezVous->execute($id);
     }
 
     /**
@@ -36,15 +45,9 @@ class RendezVousService extends Service
      */
     public function create(array $data): RendezVous
     {
-        $grossesse = Grossesse::find($data['grossesse_id']);
-        if (!$grossesse) {
-            $this->notFound('grossesse_not_found');
-        }
-
-        $data['maman_id'] = $grossesse->maman_id;
         $data['statut'] = $data['statut'] ?? 'prévu';
 
-        return RendezVous::create($data);
+        return $this->createRendezVous->execute(CreateRendezVousData::fromArray($data));
     }
 
     /**
@@ -52,15 +55,7 @@ class RendezVousService extends Service
      */
     public function update(string $id, array $data): ?RendezVous
     {
-        $rendezVous = RendezVous::find($id);
-        
-        if (!$rendezVous) {
-            $this->notFound('rendez_vous_not_found');
-        }
-
-        $rendezVous->update($data);
-        
-        return $rendezVous;
+        return $this->updateRendezVous->execute($id, UpdateRendezVousData::fromArray($data));
     }
 
     /**
@@ -68,12 +63,6 @@ class RendezVousService extends Service
      */
     public function delete(string $id): bool
     {
-        $rendezVous = RendezVous::find($id);
-        
-        if (!$rendezVous) {
-            $this->notFound('rendez_vous_not_found');
-        }
-
-        return $rendezVous->delete();
+        return $this->deleteRendezVous->execute($id);
     }
 }

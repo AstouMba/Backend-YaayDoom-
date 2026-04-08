@@ -2,6 +2,7 @@
 
 namespace App\Features\Professionnel;
 
+use App\Features\User\UserPresenter;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -19,7 +20,7 @@ class ProfessionnelController extends Controller
     {
         $professionnels = $this->professionnelService->getAll();
 
-        return response()->json($professionnels);
+        return response()->json($professionnels->map(fn ($professionnel) => UserPresenter::contract($professionnel))->values());
     }
 
     /**
@@ -29,7 +30,7 @@ class ProfessionnelController extends Controller
     {
         $professionnel = $this->professionnelService->get($id);
 
-        return response()->json($professionnel);
+        return response()->json(UserPresenter::contract($professionnel));
     }
 
     /**
@@ -39,7 +40,7 @@ class ProfessionnelController extends Controller
     {
         $professionnel = $this->professionnelService->create(ProfessionnelValidator::store($request->all()));
 
-        return response()->json($professionnel, 201);
+        return response()->json(UserPresenter::contract($professionnel), 201);
     }
 
     /**
@@ -49,7 +50,7 @@ class ProfessionnelController extends Controller
     {
         $professionnel = $this->professionnelService->update($id, ProfessionnelValidator::update($request->all(), $id));
 
-        return response()->json($professionnel);
+        return response()->json(UserPresenter::contract($professionnel));
     }
 
     /**

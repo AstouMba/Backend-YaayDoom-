@@ -57,29 +57,6 @@ class Consultation extends Model
     }
 
     /**
-     * Format contractuel exposé au frontend.
-     *
-     * @return array<string, mixed>
-     */
-    public function toContractArray(): array
-    {
-        return [
-            'id' => $this->id,
-            'maman_id' => $this->maman_id,
-            'professionnel_id' => $this->professionnel_id,
-            'type' => $this->type,
-            'date' => optional($this->date)->format('Y-m-d'),
-            'heure' => $this->heure,
-            'tension_arterielle' => $this->tension_arterielle,
-            'poids' => $this->poids,
-            'hauteur_uterine' => $this->hauteur_uterine,
-            'bcf' => $this->bcf,
-            'notes' => $this->notes,
-            'semaine_grossesse' => $this->semaine_grossesse,
-        ];
-    }
-
-    /**
      * Get the maman that owns the consultation.
      */
     public function maman(): BelongsTo

@@ -2,18 +2,33 @@
 
 namespace App\Features\Bebe;
 
+use App\Application\Bebe\CreateBebe;
+use App\Application\Bebe\DeleteBebe;
+use App\Application\Bebe\DTO\CreateBebeData;
+use App\Application\Bebe\DTO\UpdateBebeData;
+use App\Application\Bebe\GetBebe;
+use App\Application\Bebe\ListBebes;
+use App\Application\Bebe\UpdateBebe;
 use App\Models\Bebe;
 use App\Services\Service;
 use Illuminate\Database\Eloquent\Collection;
 
 class BebeService extends Service
 {
+    public function __construct(
+        private ListBebes $listBebes,
+        private GetBebe $getBebe,
+        private CreateBebe $createBebe,
+        private UpdateBebe $updateBebe,
+        private DeleteBebe $deleteBebe,
+    ) {}
+
     /**
      * Récupérer tous les bébés
      */
     public function getAll(): Collection
     {
-        return Bebe::all();
+        return $this->listBebes->execute();
     }
 
     /**
@@ -21,13 +36,7 @@ class BebeService extends Service
      */
     public function get(string $id): ?Bebe
     {
-        $bebe = Bebe::find($id);
-
-        if (!$bebe) {
-            $this->notFound('bebe_not_found');
-        }
-
-        return $bebe;
+        return $this->getBebe->execute($id);
     }
 
     /**
@@ -35,10 +44,7 @@ class BebeService extends Service
      */
     public function create(array $data): Bebe
     {
-        $data['poids_actuel'] = $data['poids_actuel'] ?? $data['poids'] ?? null;
-        $data['taille_actuelle'] = $data['taille_actuelle'] ?? $data['taille'] ?? null;
-
-        return Bebe::create($data);
+        return $this->createBebe->execute(CreateBebeData::fromArray($data));
     }
 
     /**
@@ -46,23 +52,7 @@ class BebeService extends Service
      */
     public function update(string $id, array $data): ?Bebe
     {
-        $bebe = Bebe::find($id);
-        
-        if (!$bebe) {
-            $this->notFound('bebe_not_found');
-        }
-
-        if (array_key_exists('poids', $data) && !array_key_exists('poids_actuel', $data)) {
-            $data['poids_actuel'] = $data['poids'];
-        }
-
-        if (array_key_exists('taille', $data) && !array_key_exists('taille_actuelle', $data)) {
-            $data['taille_actuelle'] = $data['taille'];
-        }
-
-        $bebe->update($data);
-        
-        return $bebe;
+        return $this->updateBebe->execute($id, UpdateBebeData::fromArray($data));
     }
 
     /**
@@ -70,12 +60,6 @@ class BebeService extends Service
      */
     public function delete(string $id): bool
     {
-        $bebe = Bebe::find($id);
-        
-        if (!$bebe) {
-            $this->notFound('bebe_not_found');
-        }
-
-        return $bebe->delete();
+        return $this->deleteBebe->execute($id);
     }
 }

@@ -20,7 +20,7 @@ class GrossesseController extends Controller
         $grossesses = $this->grossesseService->getAll();
         return response()->json($grossesses->map(function ($grossesse) {
             $grossesse->loadMissing('maman');
-            return $grossesse->toContractArray();
+            return GrossessePresenter::contract($grossesse);
         })->values());
     }
 
@@ -32,7 +32,7 @@ class GrossesseController extends Controller
         $grossesse = $this->grossesseService->get($id);
         $grossesse->loadMissing('maman');
 
-        return response()->json($grossesse->toContractArray());
+        return response()->json(GrossessePresenter::contract($grossesse));
     }
 
     /**
@@ -42,7 +42,7 @@ class GrossesseController extends Controller
     {
         $grossesse = $this->grossesseService->create(GrossesseValidator::store($request->all()), $request->user());
         $grossesse->loadMissing('maman');
-        return response()->json($grossesse->toContractArray(), 201);
+        return response()->json(GrossessePresenter::contract($grossesse), 201);
     }
 
     /**
@@ -53,7 +53,7 @@ class GrossesseController extends Controller
         $grossesse = $this->grossesseService->update($id, GrossesseValidator::update($request->all()));
         $grossesse->loadMissing('maman');
 
-        return response()->json($grossesse->toContractArray());
+        return response()->json(GrossessePresenter::contract($grossesse));
     }
 
     /**

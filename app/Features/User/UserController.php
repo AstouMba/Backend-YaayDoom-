@@ -19,7 +19,9 @@ class UserController extends Controller
     {
         $users = $this->userService->getAll();
 
-        return response()->json($users);
+        return response()->json(
+            $users->map(fn ($user) => UserPresenter::contract($user))->values()
+        );
     }
 
     /**
@@ -29,7 +31,7 @@ class UserController extends Controller
     {
         $user = $this->userService->get($id);
 
-        return response()->json($user->toContractArray());
+        return response()->json(UserPresenter::contract($user));
     }
 
     /**
@@ -39,7 +41,7 @@ class UserController extends Controller
     {
         $user = $this->userService->create(UserValidator::store($request->all()));
 
-        return response()->json($user->toContractArray(), 201);
+        return response()->json(UserPresenter::contract($user), 201);
     }
 
     /**
@@ -49,7 +51,7 @@ class UserController extends Controller
     {
         $user = $this->userService->update($id, UserValidator::update($request->all(), $id));
 
-        return response()->json($user->toContractArray());
+        return response()->json(UserPresenter::contract($user));
     }
 
     /**

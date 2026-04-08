@@ -2,19 +2,33 @@
 
 namespace App\Features\Professionnel;
 
+use App\Application\Professionnel\CreateProfessionnel;
+use App\Application\Professionnel\DeleteProfessionnel;
+use App\Application\Professionnel\DTO\CreateProfessionnelData;
+use App\Application\Professionnel\DTO\UpdateProfessionnelData;
+use App\Application\Professionnel\GetProfessionnel;
+use App\Application\Professionnel\ListProfessionnels;
+use App\Application\Professionnel\UpdateProfessionnel;
 use App\Models\User;
 use App\Services\Service;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Hash;
 
 class ProfessionnelService extends Service
 {
+    public function __construct(
+        private ListProfessionnels $listProfessionnels,
+        private GetProfessionnel $getProfessionnel,
+        private CreateProfessionnel $createProfessionnel,
+        private UpdateProfessionnel $updateProfessionnel,
+        private DeleteProfessionnel $deleteProfessionnel,
+    ) {}
+
     /**
      * Récupérer tous les professionnels
      */
     public function getAll(): Collection
     {
-        return User::where('role', 'professionnel')->get();
+        return $this->listProfessionnels->execute();
     }
 
     /**
@@ -22,13 +36,7 @@ class ProfessionnelService extends Service
      */
     public function get(string $id): ?User
     {
-        $professionnel = User::where('role', 'professionnel')->find($id);
-
-        if (!$professionnel) {
-            $this->notFound('professionnel_not_found');
-        }
-
-        return $professionnel;
+        return $this->getProfessionnel->execute($id);
     }
 
     /**
@@ -36,18 +44,7 @@ class ProfessionnelService extends Service
      */
     public function create(array $data): User
     {
-        return User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'phone' => $data['phone'] ?? null,
-            'password' => Hash::make($data['password']),
-            'role' => 'professionnel',
-            'status' => $data['status'] ?? 'actif',
-            'is_validated' => $data['is_validated'] ?? false,
-            'specialite' => $data['specialite'] ?? null,
-            'matricule' => $data['matricule'] ?? null,
-            'centre_de_sante' => $data['centre_de_sante'] ?? null,
-        ]);
+        return $this->createProfessionnel->execute(CreateProfessionnelData::fromArray($data));
     }
 
     /**
@@ -55,43 +52,7 @@ class ProfessionnelService extends Service
      */
     public function update(string $id, array $data): ?User
     {
-        $professionnel = User::where('role', 'professionnel')->find($id);
-
-        if (!$professionnel) {
-            $this->notFound('professionnel_not_found');
-        }
-
-        $professionnel->name = $data['name'] ?? $professionnel->name;
-        $professionnel->email = $data['email'] ?? $professionnel->email;
-        $professionnel->phone = $data['phone'] ?? $professionnel->phone;
-
-        if (isset($data['password'])) {
-            $professionnel->password = Hash::make($data['password']);
-        }
-
-        if (isset($data['status'])) {
-            $professionnel->status = $data['status'];
-        }
-
-        if (array_key_exists('is_validated', $data)) {
-            $professionnel->is_validated = (bool) $data['is_validated'];
-        }
-
-        if (array_key_exists('specialite', $data)) {
-            $professionnel->specialite = $data['specialite'];
-        }
-
-        if (array_key_exists('matricule', $data)) {
-            $professionnel->matricule = $data['matricule'];
-        }
-
-        if (array_key_exists('centre_de_sante', $data)) {
-            $professionnel->centre_de_sante = $data['centre_de_sante'];
-        }
-
-        $professionnel->save();
-
-        return $professionnel;
+        return $this->updateProfessionnel->execute($id, UpdateProfessionnelData::fromArray($data));
     }
 
     /**
@@ -99,12 +60,6 @@ class ProfessionnelService extends Service
      */
     public function delete(string $id): bool
     {
-        $professionnel = User::where('role', 'professionnel')->find($id);
-
-        if (!$professionnel) {
-            $this->notFound('professionnel_not_found');
-        }
-
-        return $professionnel->delete();
+        return $this->deleteProfessionnel->execute($id);
     }
 }

@@ -53,29 +53,6 @@ class RendezVous extends Model
     }
 
     /**
-     * Format contractuel exposé au frontend.
-     *
-     * @return array<string, mixed>
-     */
-    public function toContractArray(): array
-    {
-        return [
-            'id' => $this->id,
-            'maman_id' => $this->maman_id,
-            'grossesse_id' => $this->grossesse_id,
-            'type' => $this->type,
-            'motif' => $this->motif,
-            'date' => optional($this->date)->format('Y-m-d'),
-            'heure' => $this->heure,
-            'professionnel_id' => $this->professionnel_id,
-            'professionnel' => $this->professionnel?->name,
-            'lieu' => $this->lieu,
-            'statut' => $this->statut,
-            'notes' => $this->notes,
-        ];
-    }
-
-    /**
      * Get the maman that owns the rendez-vous.
      */
     public function maman(): BelongsTo

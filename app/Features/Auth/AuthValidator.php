@@ -11,13 +11,15 @@ class AuthValidator
      */
     public static function register(array $data): array
     {
+        $data['role'] = $data['role'] ?? 'maman';
+
         $validated = Validator::make($data, [
             'fullName' => 'required_without:name|string|max:255',
             'name' => 'required_without:fullName|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'phone' => 'nullable|string|max:30|unique:users,phone',
-            'birthDate' => 'nullable|date',
-            'password' => 'required|string|min:8',
+            'email' => 'required_if:role,professionnel|nullable|email|unique:users,email',
+            'phone' => 'required|string|max:30|unique:users,phone',
+            'birthDate' => 'required_if:role,maman|nullable|date',
+            'password' => 'required|string|min:8|confirmed',
             'role' => 'sometimes|string|in:maman,professionnel',
             'specialty' => 'nullable|string|max:255',
             'specialite' => 'nullable|string|max:255',
@@ -30,8 +32,13 @@ class AuthValidator
         $validated['specialite'] = $validated['specialite'] ?? $validated['specialty'] ?? null;
         $validated['centre_de_sante'] = $validated['centre_de_sante'] ?? $validated['healthCenter'] ?? null;
 
+        if (($validated['role'] ?? 'maman') === 'maman') {
+            $validated['email'] = $validated['email'] ?? null;
+        }
+
         if (($validated['role'] ?? 'maman') === 'professionnel') {
             Validator::make($validated, [
+                'email' => 'required|email|unique:users,email',
                 'specialite' => 'required_without:specialty|string|max:255',
                 'specialty' => 'required_without:specialite|string|max:255',
                 'matricule' => 'required|string|max:255',
@@ -80,6 +87,17 @@ class AuthValidator
         return Validator::make($data, [
             'currentPassword' => 'required|string',
             'newPassword' => 'required|string|min:8',
+        ])->validate();
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public static function uploadProfessionalDocuments(array $data): array
+    {
+        return Validator::make($data, [
+            'documents' => 'required|array|min:1|max:10',
+            'documents.*' => 'file|mimes:pdf,jpg,jpeg,png|max:5120',
         ])->validate();
     }
 }

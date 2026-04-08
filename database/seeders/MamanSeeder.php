@@ -18,6 +18,7 @@ class MamanSeeder extends Seeder
             [
                 'name' => 'Aminata Diallo',
                 'phone' => '+221771234567',
+                'birth_date' => '1992-03-15',
                 'password' => Hash::make('demo1234'),
                 'role' => 'maman',
                 'status' => 'actif',
