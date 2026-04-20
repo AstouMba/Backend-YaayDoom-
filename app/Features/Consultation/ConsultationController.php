@@ -17,7 +17,7 @@ class ConsultationController extends Controller
      */
     public function index(): JsonResponse
     {
-        $consultations = $this->consultationService->getAll();
+        $consultations = $this->consultationService->getAll(request()->user());
         return response()->json($consultations->map(fn ($consultation) => ConsultationPresenter::contract($consultation))->values());
     }
 
@@ -26,7 +26,7 @@ class ConsultationController extends Controller
      */
     public function show(string $id): JsonResponse
     {
-        $consultation = $this->consultationService->get($id);
+        $consultation = $this->consultationService->get($id, request()->user());
         return response()->json(ConsultationPresenter::contract($consultation));
     }
 
@@ -35,7 +35,13 @@ class ConsultationController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
-        $consultation = $this->consultationService->create(ConsultationValidator::store($request->all()));
+        $data = ConsultationValidator::store($request->all());
+
+        if (request()->user()?->role === 'professionnel') {
+            $data['professionnel_id'] = request()->user()->id;
+        }
+
+        $consultation = $this->consultationService->create($data);
         return response()->json(ConsultationPresenter::contract($consultation), 201);
     }
 
@@ -44,7 +50,7 @@ class ConsultationController extends Controller
      */
     public function update(Request $request, string $id): JsonResponse
     {
-        $consultation = $this->consultationService->update($id, ConsultationValidator::update($request->all()));
+        $consultation = $this->consultationService->update($id, ConsultationValidator::update($request->all()), request()->user());
         return response()->json(ConsultationPresenter::contract($consultation));
     }
 
@@ -53,7 +59,7 @@ class ConsultationController extends Controller
      */
     public function destroy(string $id): JsonResponse
     {
-        $this->consultationService->delete($id);
+        $this->consultationService->delete($id, request()->user());
 
         return response()->json(['message' => 'Consultation deleted successfully']);
     }

@@ -23,14 +23,14 @@ readonly class RegisterData
     {
         return new self(
             name: (string) ($data['name'] ?? $data['fullName'] ?? ''),
-            email: isset($data['email']) ? (string) $data['email'] : null,
-            phone: isset($data['phone']) ? (string) $data['phone'] : null,
-            birthDate: isset($data['birthDate']) ? (string) $data['birthDate'] : null,
+            email: ($data['email'] ?? null) ? (string) $data['email'] : null,
+            phone: ($data['phone'] ?? null) ? (string) $data['phone'] : null,
+            birthDate: ($data['birthDate'] ?? null) ? (string) $data['birthDate'] : null,
             password: (string) $data['password'],
             role: (string) ($data['role'] ?? 'maman'),
-            specialite: isset($data['specialite']) ? (string) $data['specialite'] : (isset($data['specialty']) ? (string) $data['specialty'] : null),
-            matricule: isset($data['matricule']) ? (string) $data['matricule'] : null,
-            centreDeSante: isset($data['centre_de_sante']) ? (string) $data['centre_de_sante'] : (isset($data['healthCenter']) ? (string) $data['healthCenter'] : null),
+            specialite: ($data['specialite'] ?? $data['specialty'] ?? null) ? (string) ($data['specialite'] ?? $data['specialty']) : null,
+            matricule: ($data['matricule'] ?? null) ? (string) $data['matricule'] : null,
+            centreDeSante: ($data['centre_de_sante'] ?? $data['healthCenter'] ?? null) ? (string) ($data['centre_de_sante'] ?? $data['healthCenter']) : null,
         );
     }
 }

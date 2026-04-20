@@ -25,4 +25,4 @@ RUN chmod +x /usr/local/bin/backend-entrypoint.sh \
 EXPOSE 8000
 
 ENTRYPOINT ["backend-entrypoint.sh"]
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
+CMD ["sh", "-lc", "php artisan serve --host=0.0.0.0 --port=${PORT:-8000}"]

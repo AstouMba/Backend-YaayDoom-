@@ -11,6 +11,7 @@ use App\Application\RendezVous\ListRendezVous;
 use App\Application\RendezVous\UpdateRendezVous;
 use App\Models\Grossesse;
 use App\Models\RendezVous;
+use App\Models\User;
 use App\Services\Service;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -27,17 +28,17 @@ class RendezVousService extends Service
     /**
      * Récupérer tous les rendez-vous
      */
-    public function getAll(): Collection
+    public function getAll(?User $user = null): Collection
     {
-        return $this->listRendezVous->execute();
+        return $this->listRendezVous->execute($user);
     }
 
     /**
      * Récupérer un rendez-vous par ID
      */
-    public function get(string $id): ?RendezVous
+    public function get(string $id, ?User $user = null): ?RendezVous
     {
-        return $this->getRendezVous->execute($id);
+        return $this->getRendezVous->execute($id, $user);
     }
 
     /**
@@ -53,16 +54,16 @@ class RendezVousService extends Service
     /**
      * Mettre à jour un rendez-vous
      */
-    public function update(string $id, array $data): ?RendezVous
+    public function update(string $id, array $data, ?User $user = null): ?RendezVous
     {
-        return $this->updateRendezVous->execute($id, UpdateRendezVousData::fromArray($data));
+        return $this->updateRendezVous->execute($id, UpdateRendezVousData::fromArray($data), $user);
     }
 
     /**
      * Supprimer un rendez-vous
      */
-    public function delete(string $id): bool
+    public function delete(string $id, ?User $user = null): bool
     {
-        return $this->deleteRendezVous->execute($id);
+        return $this->deleteRendezVous->execute($id, $user);
     }
 }

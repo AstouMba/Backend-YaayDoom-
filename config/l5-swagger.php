@@ -37,7 +37,7 @@ return [
         'paths' => [
             'docs' => storage_path('api-docs'),
             'views' => resource_path('views/vendor/l5-swagger'),
-            'base' => env('L5_SWAGGER_BASE_PATH', '/api'),
+            'base' => env('L5_SWAGGER_BASE_PATH', null),
             'excludes' => [],
         ],
         'scanOptions' => [
@@ -87,7 +87,7 @@ return [
             ],
         ],
         'constants' => [
-            'L5_SWAGGER_CONST_HOST' => env('L5_SWAGGER_CONST_HOST', 'http://127.0.0.1:8000'),
+            'L5_SWAGGER_CONST_HOST' => env('L5_SWAGGER_CONST_HOST', env('APP_URL', 'http://127.0.0.1:8000')),
         ],
     ],
 ];

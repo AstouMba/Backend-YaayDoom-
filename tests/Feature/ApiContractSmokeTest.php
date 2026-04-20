@@ -47,7 +47,7 @@ class ApiContractSmokeTest extends TestCase
             ]);
     }
 
-    public function test_auth_login_works_with_login_id(): void
+    public function test_auth_login_works_with_identifiant(): void
     {
         $user = User::create([
             'name' => 'Fatou Diop',
@@ -61,7 +61,7 @@ class ApiContractSmokeTest extends TestCase
         ]);
 
         $response = $this->postJson('/api/auth/login', [
-            'loginId' => $user->phone,
+            'identifiant' => $user->phone,
             'password' => 'demo1234',
         ]);
 
@@ -96,14 +96,14 @@ class ApiContractSmokeTest extends TestCase
         ]);
 
         $byPhone = $this->postJson('/api/auth/login', [
-            'loginId' => $professionnel->phone,
+            'identifiant' => $professionnel->phone,
             'password' => 'demo1234',
         ]);
 
         $byPhone->assertStatus(401);
 
         $byEmail = $this->postJson('/api/auth/login', [
-            'loginId' => $professionnel->email,
+            'identifiant' => $professionnel->email,
             'password' => 'demo1234',
         ]);
 
@@ -119,6 +119,55 @@ class ApiContractSmokeTest extends TestCase
                     'statut',
                 ],
             ]);
+    }
+
+    public function test_professional_can_validate_grossesse_explicitly(): void
+    {
+        $maman = User::create([
+            'name' => 'Aminata Diallo',
+            'email' => null,
+            'phone' => '+221771234567',
+            'birth_date' => '1992-03-15',
+            'password' => 'demo1234',
+            'role' => 'maman',
+            'status' => 'actif',
+            'is_validated' => true,
+        ]);
+
+        $professionnel = User::create([
+            'name' => 'Dr. Fatou Sow',
+            'email' => 'pro.validate.' . uniqid() . '@example.com',
+            'phone' => '+221771234580',
+            'password' => 'demo1234',
+            'role' => 'professionnel',
+            'status' => 'actif',
+            'is_validated' => true,
+            'specialite' => 'Gynécologue',
+            'matricule' => 'GYN-' . uniqid(),
+            'centre_de_sante' => 'Hôpital Principal de Dakar',
+        ]);
+
+        $grossesse = Grossesse::create([
+            'maman_id' => $maman->id,
+            'date_debut' => '2026-01-10',
+            'date_fin_prevue' => '2026-10-17',
+            'nombre_grossesses_precedentes' => 1,
+            'antecedents_medicaux' => '',
+            'professionnel_validateur' => null,
+            'date_validation' => null,
+            'trimestre' => 1,
+            'statut' => 'en_attente',
+            'notes' => '',
+        ]);
+
+        Passport::actingAs($professionnel);
+
+        $response = $this->postJson('/api/grossesses/' . $grossesse->id . '/validate');
+
+        $response->assertOk()
+            ->assertJsonPath('statut', 'VALIDEE')
+            ->assertJsonPath('professionnelValidateur', (string) $professionnel->id)
+            ->assertJsonPath('dateValidation', today()->toDateString());
     }
 
     public function test_auth_me_returns_profile_for_authenticated_user(): void

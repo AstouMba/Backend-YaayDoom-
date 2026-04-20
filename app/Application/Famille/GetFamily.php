@@ -18,8 +18,12 @@ class GetFamily extends Service
     /**
      * @return array<string, mixed>
      */
-    public function execute(string $mamanId): array
+    public function execute(string $mamanId, ?User $user = null): array
     {
+        if ($user?->role === 'maman') {
+            $mamanId = $user->id;
+        }
+
         $maman = User::where('role', 'maman')->find($mamanId);
         if (!$maman) {
             $this->notFound('famille_not_found');
@@ -96,9 +100,9 @@ class GetFamily extends Service
     /**
      * @return array<string, mixed>
      */
-    public function maman(string $mamanId): array
+    public function maman(string $mamanId, ?User $user = null): array
     {
-        $family = $this->execute($mamanId);
+        $family = $this->execute($mamanId, $user);
         $maman = User::find($mamanId);
         $grossesse = $family['grossesses'][0] ?? null;
 
@@ -121,8 +125,12 @@ class GetFamily extends Service
     /**
      * @return array<string, mixed>
      */
-    public function bebe(string $mamanId, string $bebeId): array
+    public function bebe(string $mamanId, string $bebeId, ?User $user = null): array
     {
+        if ($user?->role === 'maman') {
+            $mamanId = $user->id;
+        }
+
         $bebe = Bebe::with('vaccinations')->where('maman_id', $mamanId)->find($bebeId);
         if (!$bebe) {
             $this->notFound('bebe_not_found');

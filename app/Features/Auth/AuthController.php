@@ -22,7 +22,7 @@ class AuthController extends Controller
         $user = $this->authService->register(AuthValidator::register($request->all()));
         $token = app()->environment('testing')
             ? 'testing-token-' . Str::uuid()->toString()
-            : $user->createToken('auth_token')->accessToken;
+            : $this->authService->issueToken($user, 'auth_token');
 
         return response()->json([
             'success' => true,
@@ -44,6 +44,7 @@ class AuthController extends Controller
 
         return response()->json([
             'token' => $result['token'],
+            'access_token' => $result['token'],
             'user' => UserPresenter::contract($result['user']),
         ]);
     }

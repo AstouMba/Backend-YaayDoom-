@@ -1,5 +1,21 @@
 <?php
 
+$defaultAllowedOrigins = [
+    'https://yaaydoom.vercel.app',
+    'https://yaaydoom-backend-latest.onrender.com',
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'http://localhost:5173',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+];
+
+$appUrl = env('APP_URL');
+
+if (is_string($appUrl) && filter_var($appUrl, FILTER_VALIDATE_URL)) {
+    $defaultAllowedOrigins[] = rtrim($appUrl, '/');
+}
+
 return [
 
     /*
@@ -17,9 +33,9 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => array_filter(array_map('trim', explode(',', (string) env(
-        'CORS_ALLOWED_ORIGINS',
-        'http://localhost:3000,http://127.0.0.1:3000'
+    'allowed_origins' => array_values(array_unique(array_filter(array_map(
+        'trim',
+        explode(',', (string) env('CORS_ALLOWED_ORIGINS', implode(',', $defaultAllowedOrigins)))
     )))),
 
     'allowed_origins_patterns' => [],

@@ -5,7 +5,6 @@ namespace App\Features\Vaccination;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class VaccinationController extends Controller
 {
@@ -18,7 +17,7 @@ class VaccinationController extends Controller
      */
     public function index(): JsonResponse
     {
-        $vaccinations = $this->vaccinationService->getAll();
+        $vaccinations = $this->vaccinationService->getAll(request()->user());
         return response()->json($vaccinations->map(function ($vaccination) {
             $vaccination->loadMissing('bebe');
             return VaccinationPresenter::contract($vaccination);
@@ -30,7 +29,7 @@ class VaccinationController extends Controller
      */
     public function show(string $id): JsonResponse
     {
-        $vaccination = $this->vaccinationService->get($id);
+        $vaccination = $this->vaccinationService->get($id, request()->user());
         $vaccination->loadMissing('bebe');
 
         return response()->json(VaccinationPresenter::contract($vaccination));
@@ -41,9 +40,13 @@ class VaccinationController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
-        $vaccination = $this->vaccinationService->create(array_merge(VaccinationValidator::store($request->all()), [
-            'professionnel_id' => Auth::id(),
-        ]));
+        $data = VaccinationValidator::store($request->all());
+
+        if (request()->user()?->role === 'professionnel') {
+            $data['professionnel_id'] = request()->user()->id;
+        }
+
+        $vaccination = $this->vaccinationService->create($data);
         $vaccination->loadMissing('bebe');
         return response()->json(VaccinationPresenter::contract($vaccination), 201);
     }
@@ -53,7 +56,7 @@ class VaccinationController extends Controller
      */
     public function update(Request $request, string $id): JsonResponse
     {
-        $vaccination = $this->vaccinationService->update($id, VaccinationValidator::update($request->all()));
+        $vaccination = $this->vaccinationService->update($id, VaccinationValidator::update($request->all()), request()->user());
         $vaccination->loadMissing('bebe');
 
         return response()->json(VaccinationPresenter::contract($vaccination));
@@ -64,7 +67,7 @@ class VaccinationController extends Controller
      */
     public function destroy(string $id): JsonResponse
     {
-        $this->vaccinationService->delete($id);
+        $this->vaccinationService->delete($id, request()->user());
 
         return response()->json(['message' => 'Vaccination deleted successfully']);
     }

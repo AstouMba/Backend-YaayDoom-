@@ -17,7 +17,7 @@ class GrossesseController extends Controller
      */
     public function index(): JsonResponse
     {
-        $grossesses = $this->grossesseService->getAll();
+        $grossesses = $this->grossesseService->getAll(request()->user());
         return response()->json($grossesses->map(function ($grossesse) {
             $grossesse->loadMissing('maman');
             return GrossessePresenter::contract($grossesse);
@@ -29,7 +29,7 @@ class GrossesseController extends Controller
      */
     public function show(string $id): JsonResponse
     {
-        $grossesse = $this->grossesseService->get($id);
+        $grossesse = $this->grossesseService->get($id, request()->user());
         $grossesse->loadMissing('maman');
 
         return response()->json(GrossessePresenter::contract($grossesse));
@@ -51,6 +51,17 @@ class GrossesseController extends Controller
     public function update(Request $request, string $id): JsonResponse
     {
         $grossesse = $this->grossesseService->update($id, GrossesseValidator::update($request->all()));
+        $grossesse->loadMissing('maman');
+
+        return response()->json(GrossessePresenter::contract($grossesse));
+    }
+
+    /**
+     * Valide une grossesse de façon explicite
+     */
+    public function validateGrossesse(string $id): JsonResponse
+    {
+        $grossesse = $this->grossesseService->validateGrossesse($id, request()->user());
         $grossesse->loadMissing('maman');
 
         return response()->json(GrossessePresenter::contract($grossesse));

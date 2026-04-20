@@ -10,6 +10,7 @@ use App\Application\Vaccination\GetVaccination;
 use App\Application\Vaccination\ListVaccinations;
 use App\Application\Vaccination\UpdateVaccination;
 use App\Models\Vaccination;
+use App\Models\User;
 use App\Services\Service;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -26,17 +27,17 @@ class VaccinationService extends Service
     /**
      * Récupérer toutes les vaccinations
      */
-    public function getAll(): Collection
+    public function getAll(?User $user = null): Collection
     {
-        return $this->listVaccinations->execute();
+        return $this->listVaccinations->execute($user);
     }
 
     /**
      * Récupérer une vaccination par ID
      */
-    public function get(string $id): ?Vaccination
+    public function get(string $id, ?User $user = null): ?Vaccination
     {
-        return $this->getVaccination->execute($id);
+        return $this->getVaccination->execute($id, $user);
     }
 
     /**
@@ -50,16 +51,16 @@ class VaccinationService extends Service
     /**
      * Mettre à jour une vaccination
      */
-    public function update(string $id, array $data): ?Vaccination
+    public function update(string $id, array $data, ?User $user = null): ?Vaccination
     {
-        return $this->updateVaccination->execute($id, UpdateVaccinationData::fromArray($data));
+        return $this->updateVaccination->execute($id, UpdateVaccinationData::fromArray($data), $user);
     }
 
     /**
      * Supprimer une vaccination
      */
-    public function delete(string $id): bool
+    public function delete(string $id, ?User $user = null): bool
     {
-        return $this->deleteVaccination->execute($id);
+        return $this->deleteVaccination->execute($id, $user);
     }
 }

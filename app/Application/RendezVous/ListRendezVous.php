@@ -3,13 +3,20 @@
 namespace App\Application\RendezVous;
 
 use App\Models\RendezVous;
+use App\Models\User;
 use App\Services\Service;
 use Illuminate\Database\Eloquent\Collection;
 
 class ListRendezVous extends Service
 {
-    public function execute(): Collection
+    public function execute(?User $user = null): Collection
     {
-        return RendezVous::all();
+        $query = RendezVous::query()->with('professionnel');
+
+        if ($user?->role === 'maman') {
+            $query->where('maman_id', $user->id);
+        }
+
+        return $query->latest('date')->get();
     }
 }

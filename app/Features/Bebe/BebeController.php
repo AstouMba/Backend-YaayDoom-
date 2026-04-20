@@ -17,7 +17,7 @@ class BebeController extends Controller
      */
     public function index(): JsonResponse
     {
-        $bebes = $this->bebeService->getAll();
+        $bebes = $this->bebeService->getAll(request()->user());
         return response()->json($bebes->map(fn ($bebe) => BebePresenter::contract($bebe))->values());
     }
 
@@ -26,7 +26,7 @@ class BebeController extends Controller
      */
     public function show(string $id): JsonResponse
     {
-        $bebe = $this->bebeService->get($id);
+        $bebe = $this->bebeService->get($id, request()->user());
         return response()->json(BebePresenter::contract($bebe));
     }
 

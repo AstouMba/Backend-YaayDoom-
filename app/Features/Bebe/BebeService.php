@@ -10,6 +10,7 @@ use App\Application\Bebe\GetBebe;
 use App\Application\Bebe\ListBebes;
 use App\Application\Bebe\UpdateBebe;
 use App\Models\Bebe;
+use App\Models\User;
 use App\Services\Service;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -26,17 +27,17 @@ class BebeService extends Service
     /**
      * Récupérer tous les bébés
      */
-    public function getAll(): Collection
+    public function getAll(?User $user = null): Collection
     {
-        return $this->listBebes->execute();
+        return $this->listBebes->execute($user);
     }
 
     /**
      * Récupérer un bébé par ID
      */
-    public function get(string $id): ?Bebe
+    public function get(string $id, ?User $user = null): ?Bebe
     {
-        return $this->getBebe->execute($id);
+        return $this->getBebe->execute($id, $user);
     }
 
     /**

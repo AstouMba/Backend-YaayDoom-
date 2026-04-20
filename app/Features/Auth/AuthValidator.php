@@ -3,6 +3,7 @@
 namespace App\Features\Auth;
 
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 class AuthValidator
 {
@@ -11,6 +12,14 @@ class AuthValidator
      */
     public static function register(array $data): array
     {
+        $data['fullName'] = $data['fullName'] ?? $data['name'] ?? $data['full_name'] ?? null;
+        $data['name'] = $data['name'] ?? $data['fullName'] ?? $data['full_name'] ?? null;
+        $data['phone'] = $data['phone'] ?? $data['telephone'] ?? $data['tel'] ?? null;
+        $data['birthDate'] = $data['birthDate'] ?? $data['birth_date'] ?? $data['date_naissance'] ?? null;
+        $data['password_confirmation'] = $data['password_confirmation']
+            ?? $data['passwordConfirmation']
+            ?? $data['confirmPassword']
+            ?? null;
         $data['role'] = $data['role'] ?? 'maman';
 
         $validated = Validator::make($data, [
@@ -55,12 +64,44 @@ class AuthValidator
      */
     public static function login(array $data): array
     {
-        return Validator::make($data, [
+        foreach (['login', 'loginId', 'identifier', 'identifiant', 'email', 'telephone', 'phone', 'tel'] as $field) {
+            if (array_key_exists($field, $data) && is_string($data[$field]) && trim($data[$field]) === '') {
+                $data[$field] = null;
+            }
+        }
+
+        $identifiant = self::firstFilledString(
+            $data['identifiant'] ?? null,
+            $data['loginId'] ?? null,
+            $data['identifier'] ?? null,
+            $data['email'] ?? null,
+            $data['phone'] ?? null,
+            $data['telephone'] ?? null,
+            $data['tel'] ?? null
+        );
+
+        if ($identifiant === null) {
+            throw ValidationException::withMessages([
+                'identifiant' => ['L’email ou le numéro de téléphone est requis.'],
+            ]);
+        }
+
+        $validated = Validator::make([
+            'identifiant' => $identifiant,
+            'password' => $data['password'] ?? null,
+        ], [
+            'identifiant' => 'required|string',
             'password' => 'required|string',
-            'login' => 'nullable|string',
-            'loginId' => 'nullable|string',
-            'email' => 'nullable|email',
+        ], [
+            'identifiant.required' => "L'email ou le numéro de téléphone est requis.",
+            'password.required' => 'Le mot de passe est requis.',
         ])->validate();
+
+        if (! filter_var($validated['identifiant'], FILTER_VALIDATE_EMAIL)) {
+            $validated['identifiant'] = self::normalizePhone($validated['identifiant']);
+        }
+
+        return $validated;
     }
 
     /**
@@ -99,5 +140,25 @@ class AuthValidator
             'documents' => 'required|array|min:1|max:10',
             'documents.*' => 'file|mimes:pdf,jpg,jpeg,png|max:5120',
         ])->validate();
+    }
+
+    private static function firstFilledString(mixed ...$values): ?string
+    {
+        foreach ($values as $value) {
+            if (is_string($value)) {
+                $value = trim($value);
+
+                if ($value !== '') {
+                    return $value;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private static function normalizePhone(string $value): string
+    {
+        return preg_replace('/\D+/', '', $value) ?? $value;
     }
 }

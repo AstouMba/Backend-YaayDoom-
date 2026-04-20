@@ -2,16 +2,17 @@
     "openapi": "3.0.0",
     "info": {
         "title": "YaayDoom API",
-        "description": "Documentation OpenAPI alignée sur le backend courant et le contrat frontend UUID-only",
+        "description": "Documentation OpenAPI alignée sur le backend courant et les objets JSON normalisés côté front",
         "version": "1.0.0"
     },
     "servers": [
         {
-            "url": "http://127.0.0.1:8000",
-            "description": "Serveur local"
+            "url": "https://yaaydoom-backend-latest.onrender.com",
+            "description": "Serveur de production Render"
         },
         {
-            "url": "/api"
+            "url": "http://127.0.0.1:8000",
+            "description": "Serveur local"
         }
     ],
     "paths": {
@@ -21,7 +22,7 @@
                     "Auth"
                 ],
                 "summary": "Inscription utilisateur",
-                "description": "La maman s'inscrit en une étape avec téléphone, nom complet, date de naissance et mot de passe. Le professionnel fournit aussi ses informations de métier et reste en attente de validation admin.",
+                "description": "La maman s'inscrit avec nom complet, téléphone, date de naissance et mot de passe. Le professionnel ajoute aussi son email et ses informations de métier, puis reste en attente de validation admin. Les exemples de réponse suivent le contract `UserPresenter::contract`.",
                 "operationId": "119f45032d3afea4e5371c207ab0426c",
                 "requestBody": {
                     "required": true,
@@ -53,7 +54,7 @@
                                     "email": {
                                         "type": "string",
                                         "format": "email",
-                                        "example": "aminata@example.com",
+                                        "example": null,
                                         "nullable": true
                                     },
                                     "password": {
@@ -101,19 +102,31 @@
                                 "schema": {},
                                 "example": {
                                     "success": true,
+                                    "message": "Compte créé avec succès.",
+                                    "token": "testing-token-8d6c1a1f-3f52-4ef3-b3e6-7b83c5e6a111",
+                                    "access_token": "testing-token-8d6c1a1f-3f52-4ef3-b3e6-7b83c5e6a111",
                                     "user": {
                                         "id": "c1f0f2ce-8a34-4f95-8a3a-4c9d33a0b1d1",
                                         "nom": "Aminata Diallo",
+                                        "name": "Aminata Diallo",
+                                        "email": null,
                                         "telephone": "+221771234567",
+                                        "phone": "+221771234567",
                                         "date_naissance": "1992-03-15",
                                         "role": "maman",
+                                        "isValidated": true,
                                         "specialite": null,
+                                        "matricule": null,
+                                        "centreDeSante": null,
+                                        "documentUrl": null,
+                                        "documents": [],
+                                        "decisionStatus": null,
+                                        "decisionMotif": null,
+                                        "decisionDate": null,
+                                        "decisionBy": null,
                                         "statut": "actif",
-                                        "is_validated": true
-                                    },
-                                    "token": "jwt-token-here",
-                                    "access_token": "jwt-token-here",
-                                    "message": "Compte créé avec succès."
+                                        "dateInscription": "2026-04-09"
+                                    }
                                 }
                             }
                         }
@@ -126,7 +139,7 @@
                                 "example": {
                                     "message": "Le formulaire contient des erreurs",
                                     "errors": {
-                                        "email": [
+                                        "birthDate": [
                                             "Le champ est requis"
                                         ],
                                         "password": [
@@ -146,7 +159,7 @@
                     "Auth"
                 ],
                 "summary": "Connexion utilisateur",
-                "description": "La maman se connecte avec son téléphone. Le professionnel et l'admin se connectent avec leur email.",
+                "description": "La maman se connecte avec son téléphone. Le professionnel et l'admin se connectent avec leur email. Le contrat public expose un seul champ `identifiant` qui accepte soit un email, soit un numéro de téléphone.",
                 "operationId": "c89bcfcd1f1f9f989779b60c2b728a1c",
                 "requestBody": {
                     "required": true,
@@ -154,11 +167,12 @@
                         "application/json": {
                             "schema": {
                                 "required": [
-                                    "loginId",
+                                    "identifiant",
                                     "password"
                                 ],
                                 "properties": {
-                                    "loginId": {
+                                    "identifiant": {
+                                        "description": "Email ou numéro de téléphone",
                                         "type": "string",
                                         "example": "+221771234567"
                                     },
@@ -179,18 +193,28 @@
                             "application/json": {
                                 "schema": {},
                                 "example": {
-                                    "token": "jwt-token-here",
+                                    "token": "testing-token-3ed0b0f2-83b8-4d51-8f5b-bbfe3f2a8a45",
                                     "user": {
                                         "id": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
                                         "nom": "Fatou Diop",
-                                        "telephone": "+221 77 123 45 67",
-                                        "date_naissance": "1991-04-10",
+                                        "name": "Fatou Diop",
+                                        "email": null,
+                                        "telephone": "+221771234567",
+                                        "phone": "+221771234567",
+                                        "date_naissance": "1992-03-15",
                                         "role": "maman",
+                                        "isValidated": true,
                                         "specialite": null,
                                         "matricule": null,
-                                        "centre_de_sante": null,
-                                        "is_validated": true,
-                                        "statut": "actif"
+                                        "centreDeSante": null,
+                                        "documentUrl": null,
+                                        "documents": [],
+                                        "decisionStatus": null,
+                                        "decisionMotif": null,
+                                        "decisionDate": null,
+                                        "decisionBy": null,
+                                        "statut": "actif",
+                                        "dateInscription": "2026-04-09"
                                     }
                                 }
                             }
@@ -204,8 +228,8 @@
                                 "example": {
                                     "message": "Le formulaire contient des erreurs",
                                     "errors": {
-                                        "loginId": [
-                                            "Le champ est requis"
+                                        "identifiant": [
+                                            "L’email ou le numéro de téléphone est requis."
                                         ],
                                         "password": [
                                             "Le champ est requis"
@@ -283,14 +307,24 @@
                                 "example": {
                                     "id": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
                                     "nom": "Fatou Diop",
-                                    "telephone": "+221 77 123 45 67",
-                                    "date_naissance": "1991-04-10",
+                                    "name": "Fatou Diop",
+                                    "email": null,
+                                    "telephone": "+221771234567",
+                                    "phone": "+221771234567",
+                                    "date_naissance": "1992-03-15",
                                     "role": "maman",
+                                    "isValidated": true,
                                     "specialite": null,
                                     "matricule": null,
-                                    "centre_de_sante": null,
-                                    "is_validated": true,
-                                    "statut": "actif"
+                                    "centreDeSante": null,
+                                    "documentUrl": null,
+                                    "documents": [],
+                                    "decisionStatus": null,
+                                    "decisionMotif": null,
+                                    "decisionDate": null,
+                                    "decisionBy": null,
+                                    "statut": "actif",
+                                    "dateInscription": "2026-04-09"
                                 }
                             }
                         }
@@ -330,12 +364,24 @@
                                 "example": {
                                     "id": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
                                     "nom": "Fatou Diop",
+                                    "name": "Fatou Diop",
                                     "email": "fatou.diop@email.com",
-                                    "telephone": "+221 77 123 45 67",
+                                    "telephone": "+221771234567",
+                                    "phone": "+221771234567",
+                                    "date_naissance": "1992-03-15",
                                     "role": "professionnel",
+                                    "isValidated": true,
                                     "specialite": "Sage-femme",
+                                    "matricule": "SF-2024-001",
+                                    "centreDeSante": "Hôpital Principal de Dakar",
+                                    "documentUrl": null,
+                                    "documents": [],
+                                    "decisionStatus": "approved",
+                                    "decisionMotif": "Documents conformes",
+                                    "decisionDate": "2026-04-09 10:15:00",
+                                    "decisionBy": "8e4d7b4d-1f5a-4f7d-9d2b-3dcd8c0d7a20",
                                     "statut": "actif",
-                                    "is_validated": true
+                                    "dateInscription": "2026-04-09"
                                 }
                             }
                         }
@@ -472,6 +518,16 @@
                                     "user": {
                                         "id": "3a7dbd62-8f9d-4d1e-b7c4-0b2c90a5d111",
                                         "nom": "Dr. Mariama Ba",
+                                        "name": "Dr. Mariama Ba",
+                                        "email": "mariama.ba@hopital.sn",
+                                        "telephone": "+221771234567",
+                                        "phone": "+221771234567",
+                                        "date_naissance": "1988-01-12",
+                                        "role": "professionnel",
+                                        "isValidated": false,
+                                        "specialite": "Sage-femme",
+                                        "matricule": "SF-2024-015",
+                                        "centreDeSante": "Clinique Mere-Enfant",
                                         "documentUrl": "/storage/professionnels/3a7dbd62-8f9d-4d1e-b7c4-0b2c90a5d111/verification/attestation.pdf",
                                         "documents": [
                                             {
@@ -479,7 +535,13 @@
                                                 "url": "/storage/professionnels/3a7dbd62-8f9d-4d1e-b7c4-0b2c90a5d111/verification/attestation.pdf",
                                                 "mime": "application/pdf"
                                             }
-                                        ]
+                                        ],
+                                        "decisionStatus": null,
+                                        "decisionMotif": null,
+                                        "decisionDate": null,
+                                        "decisionBy": null,
+                                        "statut": "actif",
+                                        "dateInscription": "2026-04-09"
                                     }
                                 }
                             }
@@ -549,11 +611,20 @@
                                         "id": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
                                         "nom": "Fatou Diop",
                                         "email": "fatou.diop@email.com",
-                                        "telephone": "+221 77 123 45 67",
+                                        "telephone": "+221771234567",
                                         "role": "maman",
                                         "specialite": null,
-                                        "dateInscription": "2025-01-15",
-                                        "statut": "actif"
+                                        "matricule": null,
+                                        "centreDesante": null,
+                                        "documents": [],
+                                        "documentUrl": null,
+                                        "decisionStatus": null,
+                                        "decisionMotif": null,
+                                        "decisionDate": null,
+                                        "decisionBy": null,
+                                        "isValidated": true,
+                                        "statut": "actif",
+                                        "dateInscription": "2026-04-09"
                                     }
                                 ]
                             }
@@ -689,7 +760,7 @@
                                         "id": "3a7dbd62-8f9d-4d1e-b7c4-0b2c90a5d111",
                                         "nom": "Dr. Aminata Ba",
                                         "email": "aminata.ba@hopital.sn",
-                                        "telephone": "+221 77 123 45 67",
+                                        "telephone": "+221771234567",
                                         "specialite": "Gynécologue",
                                         "matricule": "GYN-2024-001",
                                         "centreDesante": "Hôpital Principal de Dakar",
@@ -697,10 +768,17 @@
                                         "documents": [
                                             {
                                                 "name": "attestation.pdf",
-                                                "url": "/storage/professionnels/3a7dbd62-8f9d-4d1e-b7c4-0b2c90a5d111/verification/attestation.pdf"
+                                                "url": "/storage/professionnels/3a7dbd62-8f9d-4d1e-b7c4-0b2c90a5d111/verification/attestation.pdf",
+                                                "mime": "application/pdf"
                                             }
                                         ],
-                                        "dateInscription": "2025-01-15"
+                                        "decisionStatus": null,
+                                        "decisionMotif": null,
+                                        "decisionDate": null,
+                                        "decisionBy": null,
+                                        "isValidated": false,
+                                        "statut": "actif",
+                                        "dateInscription": "2026-04-09"
                                     }
                                 ]
                             }
@@ -786,10 +864,21 @@
                                     "professionnel": {
                                         "id": "3a7dbd62-8f9d-4d1e-b7c4-0b2c90a5d111",
                                         "nom": "Dr. Aminata Ba",
+                                        "email": "aminata.ba@hopital.sn",
+                                        "telephone": "+221771234567",
+                                        "role": "professionnel",
+                                        "specialite": "Gynécologue",
+                                        "matricule": "GYN-2024-001",
+                                        "centreDesante": "Hôpital Principal de Dakar",
+                                        "documents": [],
+                                        "documentUrl": "/storage/professionnels/3a7dbd62-8f9d-4d1e-b7c4-0b2c90a5d111/verification/attestation.pdf",
                                         "decisionStatus": "approved",
                                         "decisionMotif": "Documents conformes",
-                                        "decisionDate": "2026-04-07 10:15:00",
-                                        "decisionBy": "8e4d7b4d-1f5a-4f7d-9d2b-3dcd8c0d7a20"
+                                        "decisionDate": "2026-04-09 10:15:00",
+                                        "decisionBy": "8e4d7b4d-1f5a-4f7d-9d2b-3dcd8c0d7a20",
+                                        "isValidated": true,
+                                        "statut": "actif",
+                                        "dateInscription": "2026-04-09"
                                     }
                                 }
                             }
@@ -902,10 +991,21 @@
                                     "professionnel": {
                                         "id": "3a7dbd62-8f9d-4d1e-b7c4-0b2c90a5d111",
                                         "nom": "Dr. Aminata Ba",
+                                        "email": "aminata.ba@hopital.sn",
+                                        "telephone": "+221771234567",
+                                        "role": "professionnel",
+                                        "specialite": "Gynécologue",
+                                        "matricule": "GYN-2024-001",
+                                        "centreDesante": "Hôpital Principal de Dakar",
+                                        "documents": [],
+                                        "documentUrl": "/storage/professionnels/3a7dbd62-8f9d-4d1e-b7c4-0b2c90a5d111/verification/attestation.pdf",
                                         "decisionStatus": "rejected",
                                         "decisionMotif": "Document incomplet",
-                                        "decisionDate": "2026-04-07 10:15:00",
-                                        "decisionBy": "8e4d7b4d-1f5a-4f7d-9d2b-3dcd8c0d7a20"
+                                        "decisionDate": "2026-04-09 10:15:00",
+                                        "decisionBy": "8e4d7b4d-1f5a-4f7d-9d2b-3dcd8c0d7a20",
+                                        "isValidated": false,
+                                        "statut": "actif",
+                                        "dateInscription": "2026-04-09"
                                     }
                                 }
                             }
@@ -953,93 +1053,6 @@
                                     "message": "Le formulaire contient des erreurs.",
                                     "errors": {
                                         "motif": [
-                                            "Le champ est requis."
-                                        ]
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ]
-            }
-        },
-        "/api/admin/users/{user}/role": {
-            "patch": {
-                "tags": [
-                    "Admin"
-                ],
-                "summary": "Changer le rôle",
-                "operationId": "315699ad016bd607efc34f6857ac4b4e",
-                "parameters": [
-                    {
-                        "name": "user",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "format": "uuid"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Rôle modifié",
-                        "content": {
-                            "application/json": {
-                                "schema": {},
-                                "example": {
-                                    "success": true
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Non authentifié",
-                        "content": {
-                            "application/json": {
-                                "schema": {},
-                                "example": {
-                                    "message": "Unauthenticated."
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Accès interdit",
-                        "content": {
-                            "application/json": {
-                                "schema": {},
-                                "example": {
-                                    "message": "Forbidden."
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Non trouvé",
-                        "content": {
-                            "application/json": {
-                                "schema": {},
-                                "example": {
-                                    "message": "Utilisateur introuvable."
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Erreur de validation",
-                        "content": {
-                            "application/json": {
-                                "schema": {},
-                                "example": {
-                                    "message": "Le formulaire contient des erreurs.",
-                                    "errors": {
-                                        "role": [
                                             "Le champ est requis."
                                         ]
                                     }
@@ -1170,11 +1183,20 @@
                                     "id": "2fcb4f4f-7f18-4a44-9b53-b736f0af6d11",
                                     "nom": "Dr. Aminata Ba",
                                     "email": "aminata.ba@hopital.sn",
-                                    "telephone": "+221 77 234 56 78",
+                                    "telephone": "+221772345678",
                                     "role": "professionnel",
                                     "specialite": "Gynécologue",
-                                    "dateInscription": "2024-08-05",
-                                    "statut": "actif"
+                                    "matricule": "GYN-2024-001",
+                                    "centreDesante": "Hôpital Principal de Dakar",
+                                    "documents": [],
+                                    "documentUrl": null,
+                                    "decisionStatus": "approved",
+                                    "decisionMotif": "Documents conformes",
+                                    "decisionDate": "2026-04-09 10:15:00",
+                                    "decisionBy": "8e4d7b4d-1f5a-4f7d-9d2b-3dcd8c0d7a20",
+                                    "isValidated": true,
+                                    "statut": "actif",
+                                    "dateInscription": "2026-04-09"
                                 }
                             }
                         }
@@ -1246,11 +1268,20 @@
                                     "id": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
                                     "nom": "Fatou Diop",
                                     "email": "fatou.diop@email.com",
-                                    "telephone": "+221 77 123 45 67",
+                                    "telephone": "+221771234567",
                                     "role": "maman",
                                     "specialite": null,
-                                    "dateInscription": "2024-09-10",
-                                    "statut": "actif"
+                                    "matricule": null,
+                                    "centreDesante": null,
+                                    "documents": [],
+                                    "documentUrl": null,
+                                    "decisionStatus": null,
+                                    "decisionMotif": null,
+                                    "decisionDate": null,
+                                    "decisionBy": null,
+                                    "isValidated": true,
+                                    "statut": "actif",
+                                    "dateInscription": "2026-04-09"
                                 }
                             }
                         }
@@ -1357,18 +1388,18 @@
                                 "example": [
                                     {
                                         "id": "a31d3b9a-5aa5-4e9f-9f66-9f48ff1d7f20",
-                                        "maman_id": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
-                                        "maman_nom": "Fatou Diop",
-                                        "date_debut": "2025-01-05",
-                                        "date_fin_prevue": "2025-10-12",
-                                        "semaine_grossesse": 10,
-                                        "nombre_grossesses_precedentes": 0,
-                                        "antecedents_medicaux": "",
-                                        "statut": "en_attente",
-                                        "professionnel_validateur": null,
-                                        "date_validation": null,
+                                        "mamanId": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
+                                        "mamanNom": "Fatou Diop",
+                                        "dateDernieresRegles": "2026-01-05",
+                                        "dateAccouchePrevue": "2026-10-12",
+                                        "semaineGrossesse": 13,
+                                        "nombreGrossessesPrecedentes": 0,
+                                        "antecedentsMedicaux": "Aucun antécédent notable",
+                                        "statut": "EN_ATTENTE",
+                                        "professionnelValidateur": null,
+                                        "dateValidation": null,
                                         "trimestre": 1,
-                                        "notes": ""
+                                        "notes": "Suivi initial"
                                     }
                                 ]
                             }
@@ -1459,10 +1490,17 @@
                                 "schema": {},
                                 "example": {
                                     "id": "a31d3b9a-5aa5-4e9f-9f66-9f48ff1d7f20",
-                                    "maman_id": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
-                                    "date_debut": "2025-01-05",
-                                    "date_fin_prevue": "2025-10-12",
-                                    "statut": "en_attente",
+                                    "mamanId": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
+                                    "mamanNom": "Fatou Diop",
+                                    "dateDernieresRegles": "2026-01-05",
+                                    "dateAccouchePrevue": "2026-10-12",
+                                    "semaineGrossesse": 13,
+                                    "nombreGrossessesPrecedentes": 0,
+                                    "antecedentsMedicaux": "Aucun antécédent notable",
+                                    "statut": "EN_ATTENTE",
+                                    "professionnelValidateur": null,
+                                    "dateValidation": null,
+                                    "trimestre": 1,
                                     "notes": "Suivi initial"
                                 }
                             }
@@ -1541,18 +1579,18 @@
                                 "schema": {},
                                 "example": {
                                     "id": "a31d3b9a-5aa5-4e9f-9f66-9f48ff1d7f20",
-                                    "maman_id": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
-                                    "maman_nom": "Fatou Diop",
-                                    "date_debut": "2025-01-05",
-                                    "date_fin_prevue": "2025-10-12",
-                                    "semaine_grossesse": 10,
-                                    "nombre_grossesses_precedentes": 0,
-                                    "antecedents_medicaux": "",
-                                    "statut": "en_attente",
-                                    "professionnel_validateur": null,
-                                    "date_validation": null,
+                                    "mamanId": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
+                                    "mamanNom": "Fatou Diop",
+                                    "dateDernieresRegles": "2026-01-05",
+                                    "dateAccouchePrevue": "2026-10-12",
+                                    "semaineGrossesse": 13,
+                                    "nombreGrossessesPrecedentes": 0,
+                                    "antecedentsMedicaux": "Aucun antécédent notable",
+                                    "statut": "EN_ATTENTE",
+                                    "professionnelValidateur": null,
+                                    "dateValidation": null,
                                     "trimestre": 1,
-                                    "notes": ""
+                                    "notes": "Suivi initial"
                                 }
                             }
                         }
@@ -1597,13 +1635,13 @@
                     }
                 ]
             },
-            "put": {
+            "patch": {
                 "tags": [
                     "Maman",
                     "Professionnel"
                 ],
-                "summary": "Mettre à jour une grossesse",
-                "operationId": "d7106603f633518962bdea5226cb66fa",
+                "summary": "Mettre à jour ou valider une grossesse",
+                "operationId": "227d3f5b11d7a18a680c620199c4f532",
                 "parameters": [
                     {
                         "name": "grossesse",
@@ -1615,16 +1653,60 @@
                         }
                     }
                 ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "statut": {
+                                        "description": "La grossesse devient validée quand le professionnel la confirme.",
+                                        "type": "string",
+                                        "example": "validee"
+                                    },
+                                    "professionnel_validateur": {
+                                        "type": "string",
+                                        "format": "uuid",
+                                        "example": "2fcb4f4f-7f18-4a44-9b53-b736f0af6d11",
+                                        "nullable": true
+                                    },
+                                    "date_validation": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2026-04-12",
+                                        "nullable": true
+                                    },
+                                    "notes": {
+                                        "type": "string",
+                                        "example": "Grossesse validée après contrôle initial.",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
-                        "description": "Modifié",
+                        "description": "Mis à jour",
                         "content": {
                             "application/json": {
                                 "schema": {},
                                 "example": {
                                     "id": "a31d3b9a-5aa5-4e9f-9f66-9f48ff1d7f20",
-                                    "maman_id": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
-                                    "statut": "validee"
+                                    "mamanId": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
+                                    "mamanNom": "Fatou Diop",
+                                    "dateDernieresRegles": "2026-01-05",
+                                    "dateAccouchePrevue": "2026-10-12",
+                                    "semaineGrossesse": 13,
+                                    "nombreGrossessesPrecedentes": 0,
+                                    "antecedentsMedicaux": "Aucun antécédent notable",
+                                    "statut": "VALIDEE",
+                                    "professionnelValidateur": "2fcb4f4f-7f18-4a44-9b53-b736f0af6d11",
+                                    "dateValidation": "2026-04-12",
+                                    "trimestre": 1,
+                                    "notes": "Grossesse validée après contrôle initial."
                                 }
                             }
                         }
@@ -1670,8 +1752,8 @@
                                 "example": {
                                     "message": "Le formulaire contient des erreurs.",
                                     "errors": {
-                                        "date_fin_prevue": [
-                                            "Le champ doit être une date valide."
+                                        "statut": [
+                                            "Le champ doit être valide."
                                         ]
                                     }
                                 }
@@ -1684,14 +1766,15 @@
                         "Bearer": []
                     }
                 ]
-            },
-            "patch": {
+            }
+        },
+        "/api/grossesses/{grossesse}/validate": {
+            "post": {
                 "tags": [
-                    "Maman",
                     "Professionnel"
                 ],
-                "summary": "Mettre à jour partiellement une grossesse",
-                "operationId": "d7cdbb1f1fb58f3c5f2a06ca86926fc4",
+                "summary": "Valider explicitement une grossesse",
+                "operationId": "5e7457e4ec35fa9f90910628b58440db",
                 "parameters": [
                     {
                         "name": "grossesse",
@@ -1705,14 +1788,24 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Modifié",
+                        "description": "Grossesse validée",
                         "content": {
                             "application/json": {
                                 "schema": {},
                                 "example": {
                                     "id": "a31d3b9a-5aa5-4e9f-9f66-9f48ff1d7f20",
-                                    "maman_id": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
-                                    "statut": "validee"
+                                    "mamanId": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
+                                    "mamanNom": "Fatou Diop",
+                                    "dateDernieresRegles": "2026-01-05",
+                                    "dateAccouchePrevue": "2026-10-12",
+                                    "semaineGrossesse": 13,
+                                    "nombreGrossessesPrecedentes": 0,
+                                    "antecedentsMedicaux": "Aucun antécédent notable",
+                                    "statut": "VALIDEE",
+                                    "professionnelValidateur": "2fcb4f4f-7f18-4a44-9b53-b736f0af6d11",
+                                    "dateValidation": "2026-04-12",
+                                    "trimestre": 1,
+                                    "notes": "Grossesse validée après contrôle initial."
                                 }
                             }
                         }
@@ -1723,7 +1816,7 @@
                             "application/json": {
                                 "schema": {},
                                 "example": {
-                                    "message": "Unauthenticated."
+                                    "message": "Non authentifié"
                                 }
                             }
                         }
@@ -1775,14 +1868,18 @@
                                 "example": [
                                     {
                                         "id": "b5ad1fbe-2c58-4c2b-9a5d-9f6394f5db01",
-                                        "grossesse_id": "a31d3b9a-5aa5-4e9f-9f66-9f48ff1d7f20",
-                                        "maman_id": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
+                                        "grossesseId": "a31d3b9a-5aa5-4e9f-9f66-9f48ff1d7f20",
+                                        "mamanId": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
                                         "nom": "Moussa Diallo",
-                                        "date_naissance": "2025-10-12",
-                                        "sexe": "M",
-                                        "poids": 3.1,
-                                        "taille": 49,
-                                        "groupe_sanguin": "O+"
+                                        "dateNaissance": "2026-10-12",
+                                        "sexe": "Masculin",
+                                        "poidsNaissance": 3.1,
+                                        "tailleNaissance": 49,
+                                        "groupeSanguin": "O+",
+                                        "ageActuel": "6 mois",
+                                        "poidsActuel": 7.4,
+                                        "tailleActuelle": 69,
+                                        "mamanNom": "Fatou Diop"
                                     }
                                 ]
                             }
@@ -1889,14 +1986,18 @@
                                 "schema": {},
                                 "example": {
                                     "id": "b5ad1fbe-2c58-4c2b-9a5d-9f6394f5db01",
-                                    "maman_id": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
-                                    "grossesse_id": "a31d3b9a-5aa5-4e9f-9f66-9f48ff1d7f20",
+                                    "mamanId": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
+                                    "grossesseId": "a31d3b9a-5aa5-4e9f-9f66-9f48ff1d7f20",
                                     "nom": "Moussa Diallo",
-                                    "date_naissance": "2025-10-12",
-                                    "sexe": "M",
-                                    "poids": 3.1,
-                                    "taille": 49,
-                                    "groupe_sanguin": "O+"
+                                    "dateNaissance": "2026-10-12",
+                                    "sexe": "Masculin",
+                                    "poidsNaissance": 3.1,
+                                    "tailleNaissance": 49,
+                                    "groupeSanguin": "O+",
+                                    "ageActuel": null,
+                                    "poidsActuel": 3.1,
+                                    "tailleActuelle": 49,
+                                    "mamanNom": "Fatou Diop"
                                 }
                             }
                         }
@@ -1974,14 +2075,18 @@
                                 "schema": {},
                                 "example": {
                                     "id": "b5ad1fbe-2c58-4c2b-9a5d-9f6394f5db01",
-                                    "grossesse_id": "a31d3b9a-5aa5-4e9f-9f66-9f48ff1d7f20",
-                                    "maman_id": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
+                                    "grossesseId": "a31d3b9a-5aa5-4e9f-9f66-9f48ff1d7f20",
+                                    "mamanId": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
                                     "nom": "Moussa Diallo",
-                                    "date_naissance": "2025-10-12",
-                                    "sexe": "M",
-                                    "poids": 3.1,
-                                    "taille": 49,
-                                    "groupe_sanguin": "O+"
+                                    "dateNaissance": "2026-10-12",
+                                    "sexe": "Masculin",
+                                    "poidsNaissance": 3.1,
+                                    "tailleNaissance": 49,
+                                    "groupeSanguin": "O+",
+                                    "ageActuel": "6 mois",
+                                    "poidsActuel": 7.4,
+                                    "tailleActuelle": 69,
+                                    "mamanNom": "Fatou Diop"
                                 }
                             }
                         }
@@ -2043,17 +2148,17 @@
                                 "example": [
                                     {
                                         "id": "d1f0d0f1-4d0d-4a8d-b1f7-9d66e40e9c44",
-                                        "maman_id": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
-                                        "professionnel_id": "2fcb4f4f-7f18-4a44-9b53-b736f0af6d11",
+                                        "mamanId": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
+                                        "professionnelId": "2fcb4f4f-7f18-4a44-9b53-b736f0af6d11",
+                                        "patientName": "Fatou Diop",
+                                        "patientId": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
                                         "type": "Consultation prénatale",
-                                        "date": "2025-04-05",
+                                        "date": "2026-04-05",
                                         "heure": "09:30:00",
-                                        "tension_arterielle": "12/8",
-                                        "poids": "68",
-                                        "hauteur_uterine": "28",
-                                        "bcf": "145",
+                                        "tensionArterielle": "12/8",
+                                        "poids": 68,
                                         "notes": "Contrôle routine",
-                                        "semaine_grossesse": 24
+                                        "semaineGrossesse": 24
                                     }
                                 ]
                             }
@@ -2176,17 +2281,17 @@
                                 "schema": {},
                                 "example": {
                                     "id": "e9a5b0a8-4b2a-4f6e-a9fa-0fae5e92d110",
-                                    "maman_id": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
-                                    "professionnel_id": "2fcb4f4f-7f18-4a44-9b53-b736f0af6d11",
-                                    "date": "2025-04-05",
+                                    "mamanId": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
+                                    "professionnelId": "2fcb4f4f-7f18-4a44-9b53-b736f0af6d11",
+                                    "patientName": "Fatou Diop",
+                                    "patientId": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
+                                    "date": "2026-04-05",
                                     "heure": "09:30:00",
                                     "type": "Consultation de suivi",
+                                    "tensionArterielle": "12/8",
+                                    "poids": 68,
                                     "notes": "Tension stable",
-                                    "tension_arterielle": "12/8",
-                                    "poids": "68",
-                                    "hauteur_uterine": "28",
-                                    "bcf": "145",
-                                    "semaine_grossesse": 24
+                                    "semaineGrossesse": 24
                                 }
                             }
                         }
@@ -2264,90 +2369,19 @@
                                 "example": [
                                     {
                                         "id": "d1f0d0f1-4d0d-4a8d-b1f7-9d66e40e9c44",
-                                        "maman_id": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
-                                        "professionnel_id": "2fcb4f4f-7f18-4a44-9b53-b736f0af6d11",
+                                        "mamanId": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
+                                        "professionnelId": "2fcb4f4f-7f18-4a44-9b53-b736f0af6d11",
+                                        "patientName": "Fatou Diop",
+                                        "patientId": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
                                         "type": "Consultation prénatale",
-                                        "date": "2025-04-05",
+                                        "date": "2026-04-05",
                                         "heure": "09:30:00",
-                                        "tension_arterielle": "12/8",
-                                        "poids": "68",
-                                        "hauteur_uterine": "28",
-                                        "bcf": "145",
+                                        "tensionArterielle": "12/8",
+                                        "poids": 68,
                                         "notes": "Contrôle routine",
-                                        "semaine_grossesse": 24
+                                        "semaineGrossesse": 24
                                     }
                                 ]
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Non authentifié",
-                        "content": {
-                            "application/json": {
-                                "schema": {},
-                                "example": {
-                                    "message": "Unauthenticated."
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Accès interdit",
-                        "content": {
-                            "application/json": {
-                                "schema": {},
-                                "example": {
-                                    "message": "Forbidden."
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Non trouvé",
-                        "content": {
-                            "application/json": {
-                                "schema": {},
-                                "example": {
-                                    "message": "Consultation introuvable."
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ]
-            },
-            "patch": {
-                "tags": [
-                    "Professionnel"
-                ],
-                "summary": "Mettre à jour une consultation",
-                "operationId": "566185320109b50ac9b785527e896a63",
-                "parameters": [
-                    {
-                        "name": "consultation",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "format": "uuid"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Modifié",
-                        "content": {
-                            "application/json": {
-                                "schema": {},
-                                "example": {
-                                    "id": "e9a5b0a8-4b2a-4f6e-a9fa-0fae5e92d110",
-                                    "notes": "Évolution favorable",
-                                    "poids": "68.5"
-                                }
                             }
                         }
                     },
@@ -2409,13 +2443,15 @@
                                 "example": [
                                     {
                                         "id": "6e1b4b57-8a12-45ce-a5e1-6de8e9a21c11",
-                                        "bebe_id": "b5ad1fbe-2c58-4c2b-9a5d-9f6394f5db01",
-                                        "nom_vaccin": "BCG",
+                                        "bebeId": "b5ad1fbe-2c58-4c2b-9a5d-9f6394f5db01",
+                                        "bebeNom": "Moussa Diallo",
+                                        "nom": "BCG",
                                         "age": "À la naissance",
-                                        "date_vaccination": "2025-03-15",
-                                        "prochaine_dose": null,
-                                        "notes": "",
-                                        "professionnel_id": "2fcb4f4f-7f18-4a44-9b53-b736f0af6d11"
+                                        "datePrevu": "2026-03-15",
+                                        "dateAdministre": "2026-03-15",
+                                        "statut": "completed",
+                                        "professionnel": "Dr. Fatou Sow",
+                                        "notes": ""
                                     }
                                 ]
                             }
@@ -2511,12 +2547,15 @@
                                 "schema": {},
                                 "example": {
                                     "id": "2c9c2bb4-41c7-4a70-b8c9-41f92f6e33d1",
-                                    "bebe_id": "b5ad1fbe-2c58-4c2b-9a5d-9f6394f5db01",
-                                    "nom_vaccin": "BCG",
-                                    "date_vaccination": "2025-03-15",
-                                    "prochaine_dose": null,
-                                    "notes": "Administré à la maternité",
-                                    "professionnel_id": "2fcb4f4f-7f18-4a44-9b53-b736f0af6d11"
+                                    "bebeId": "b5ad1fbe-2c58-4c2b-9a5d-9f6394f5db01",
+                                    "bebeNom": "Moussa Diallo",
+                                    "nom": "BCG",
+                                    "age": "À la naissance",
+                                    "datePrevu": "2026-03-28",
+                                    "dateAdministre": "2026-03-28",
+                                    "statut": "completed",
+                                    "professionnel": "Dr. Fatou Sow",
+                                    "notes": "Administré à la maternité"
                                 }
                             }
                         }
@@ -2594,86 +2633,15 @@
                                 "schema": {},
                                 "example": {
                                     "id": "6e1b4b57-8a12-45ce-a5e1-6de8e9a21c11",
-                                    "bebe_id": "b5ad1fbe-2c58-4c2b-9a5d-9f6394f5db01",
-                                    "nom_vaccin": "BCG",
+                                    "bebeId": "b5ad1fbe-2c58-4c2b-9a5d-9f6394f5db01",
+                                    "bebeNom": "Moussa Diallo",
+                                    "nom": "BCG",
                                     "age": "À la naissance",
-                                    "date_vaccination": "2025-03-15",
-                                    "prochaine_dose": null,
-                                    "notes": "",
-                                    "professionnel_id": "2fcb4f4f-7f18-4a44-9b53-b736f0af6d11"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Non authentifié",
-                        "content": {
-                            "application/json": {
-                                "schema": {},
-                                "example": {
-                                    "message": "Unauthenticated."
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Accès interdit",
-                        "content": {
-                            "application/json": {
-                                "schema": {},
-                                "example": {
-                                    "message": "Forbidden."
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Non trouvé",
-                        "content": {
-                            "application/json": {
-                                "schema": {},
-                                "example": {
-                                    "message": "Vaccination introuvable."
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ]
-            },
-            "patch": {
-                "tags": [
-                    "Maman",
-                    "Professionnel"
-                ],
-                "summary": "Mettre à jour une vaccination",
-                "operationId": "afe53db655419f1314a0a3dd9de97cff",
-                "parameters": [
-                    {
-                        "name": "vaccination",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "format": "uuid"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Modifié",
-                        "content": {
-                            "application/json": {
-                                "schema": {},
-                                "example": {
-                                    "id": "2c9c2bb4-41c7-4a70-b8c9-41f92f6e33d1",
-                                    "bebe_id": "b5ad1fbe-2c58-4c2b-9a5d-9f6394f5db01",
-                                    "nom_vaccin": "BCG",
-                                    "date_vaccination": "2025-03-15"
+                                    "datePrevu": "2026-03-15",
+                                    "dateAdministre": "2026-03-15",
+                                    "statut": "completed",
+                                    "professionnel": "Dr. Fatou Sow",
+                                    "notes": ""
                                 }
                             }
                         }
@@ -2735,17 +2703,13 @@
                                 "example": [
                                     {
                                         "id": "5d3a8d33-0b6b-4f5f-9f85-2a2a8d4c7c11",
-                                        "maman_id": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
-                                        "grossesse_id": "a31d3b9a-5aa5-4e9f-9f66-9f48ff1d7f20",
                                         "type": "Consultation prénatale",
-                                        "motif": "Suivi mensuel",
-                                        "date": "2025-04-20",
+                                        "date": "2026-04-20",
                                         "heure": "14:00",
-                                        "professionnel_id": "2fcb4f4f-7f18-4a44-9b53-b736f0af6d11",
                                         "professionnel": "Dr. Fatou Sow",
                                         "lieu": "Hôpital Principal de Dakar",
                                         "statut": "prévu",
-                                        "notes": ""
+                                        "notes": "Suivi mensuel"
                                     }
                                 ]
                             }
@@ -2781,15 +2745,17 @@
                         "application/json": {
                             "schema": {
                                 "required": [
-                                    "grossesse_id",
+                                    "maman_id",
                                     "type",
-                                    "motif",
                                     "date",
-                                    "heure",
-                                    "professionnel_id",
-                                    "lieu"
+                                    "heure"
                                 ],
                                 "properties": {
+                                    "maman_id": {
+                                        "type": "string",
+                                        "format": "uuid",
+                                        "example": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11"
+                                    },
                                     "grossesse_id": {
                                         "type": "string",
                                         "format": "uuid",
@@ -2825,6 +2791,11 @@
                                         "type": "string",
                                         "example": "",
                                         "nullable": true
+                                    },
+                                    "statut": {
+                                        "type": "string",
+                                        "example": "prévu",
+                                        "nullable": true
                                     }
                                 },
                                 "type": "object"
@@ -2840,16 +2811,13 @@
                                 "schema": {},
                                 "example": {
                                     "id": "5d3a8d33-0b6b-4f5f-9f85-2a2a8d4c7c11",
-                                    "maman_id": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
-                                    "grossesse_id": "a31d3b9a-5aa5-4e9f-9f66-9f48ff1d7f20",
                                     "type": "Consultation prénatale",
-                                    "motif": "Suivi mensuel",
-                                    "date": "2025-04-20",
+                                    "date": "2026-04-20",
                                     "heure": "14:00",
-                                    "professionnel_id": "2fcb4f4f-7f18-4a44-9b53-b736f0af6d11",
+                                    "professionnel": "Dr. Fatou Sow",
                                     "lieu": "Hôpital Principal de Dakar",
                                     "statut": "prévu",
-                                    "notes": ""
+                                    "notes": "Suivi mensuel"
                                 }
                             }
                         }
@@ -2884,7 +2852,7 @@
                                 "example": {
                                     "message": "Le formulaire contient des erreurs.",
                                     "errors": {
-                                        "grossesse_id": [
+                                        "maman_id": [
                                             "Le champ est requis."
                                         ]
                                     }
@@ -2926,41 +2894,41 @@
                                 "schema": {},
                                 "example": {
                                     "id": "FAM-001",
-                                    "maman_id": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
-                                    "est_gemellaire": false,
+                                    "mamanId": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
+                                    "estGemellaire": false,
                                     "membres": [
                                         {
                                             "id": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
                                             "type": "maman",
                                             "lien": "mere",
                                             "nom": "Fatou Diop",
-                                            "est_actif": true
+                                            "age": 32
                                         },
                                         {
                                             "id": "b5ad1fbe-2c58-4c2b-9a5d-9f6394f5db01",
                                             "type": "bebe",
                                             "lien": "fille",
                                             "nom": "Aminata Jr Diallo",
-                                            "est_actif": true
+                                            "age": 6
                                         }
                                     ],
                                     "grossesses": [
                                         {
                                             "id": "a31d3b9a-5aa5-4e9f-9f66-9f48ff1d7f20",
-                                            "maman_id": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
-                                            "statut": "validee"
+                                            "mamanId": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
+                                            "statut": "VALIDEE"
                                         }
                                     ],
                                     "bebes": [
                                         {
                                             "id": "b5ad1fbe-2c58-4c2b-9a5d-9f6394f5db01",
-                                            "maman_id": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
+                                            "mamanId": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
                                             "nom": "Aminata Jr Diallo"
                                         }
                                     ],
                                     "consultations": [],
                                     "vaccinations": [],
-                                    "rendez_vous": []
+                                    "rendezVous": []
                                 }
                             }
                         }
@@ -3022,16 +2990,16 @@
                                 "example": {
                                     "maman": {
                                         "id": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
-                                        "nom": "Fatou Diop",
+                                        "name": "Fatou Diop",
                                         "email": "fatou.diop@email.com",
-                                        "telephone": "+221 77 123 45 67"
+                                        "phone": "+221771234567"
                                     },
                                     "grossesse": {
                                         "id": "a31d3b9a-5aa5-4e9f-9f66-9f48ff1d7f20",
-                                        "statut": "validee"
+                                        "statut": "VALIDEE"
                                     },
                                     "consultations": [],
-                                    "rendez_vous": []
+                                    "rendezVous": []
                                 }
                             }
                         }
@@ -3103,8 +3071,8 @@
                                     "bebe": {
                                         "id": "b5ad1fbe-2c58-4c2b-9a5d-9f6394f5db01",
                                         "nom": "Aminata Jr Diallo",
-                                        "date_naissance": "2025-03-15",
-                                        "sexe": "F"
+                                        "dateNaissance": "2026-03-15",
+                                        "sexe": "Féminin"
                                     },
                                     "vaccinations": [],
                                     "croissance": []
@@ -3178,13 +3146,14 @@
                                     "type": "grossesse",
                                     "patient": {
                                         "id": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
-                                        "nom": "Fatou Diop",
-                                        "telephone": "+221 77 123 45 67"
+                                        "name": "Fatou Diop",
+                                        "email": "fatou.diop@email.com",
+                                        "phone": "+221771234567"
                                     },
                                     "grossesse": {
                                         "id": "a31d3b9a-5aa5-4e9f-9f66-9f48ff1d7f20",
-                                        "maman_id": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
-                                        "statut": "validee"
+                                        "mamanId": "9c0a3d40-6f1b-4c2b-9d15-8e0b9d8a7f11",
+                                        "statut": "VALIDEE"
                                     }
                                 }
                             }

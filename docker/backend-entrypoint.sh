@@ -33,6 +33,11 @@ if [ "${RUN_MIGRATIONS:-false}" = "true" ]; then
   php artisan migrate --force
 fi
 
+if [ "${APP_ENV:-local}" != "testing" ] && [ "${SKIP_PASSPORT_SETUP:-false}" != "true" ]; then
+  echo "Ensuring Passport is ready"
+  php artisan passport:ensure
+fi
+
 if [ "${USE_MOCK_DATA:-false}" = "true" ]; then
   echo "Running migrations and seeding mock data"
   php artisan migrate --force --seed

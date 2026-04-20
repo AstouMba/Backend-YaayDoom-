@@ -11,7 +11,9 @@ class BebeSeeder extends Seeder
 {
     public function run(): void
     {
-        $maman = User::where('email', 'maman@demo.com')->firstOrFail();
+        $maman = User::where('role', 'maman')
+            ->where('phone', '+221771234567')
+            ->firstOrFail();
         $grossesseTerminee = Grossesse::where('maman_id', $maman->id)
             ->where('statut', 'terminee')
             ->first();

@@ -134,10 +134,9 @@ DB_CONNECTION=pgsql
 DB_URL=postgresql://username:password@host/database?sslmode=require
 DB_SSLMODE=require
 
-CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+CORS_ALLOWED_ORIGINS=https://yaaydoom.vercel.app,http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173
 
 L5_SWAGGER_GENERATE_ALWAYS=true
-L5_SWAGGER_BASE_PATH=/api
 L5_SWAGGER_CONST_HOST=http://127.0.0.1:8000
 L5_SWAGGER_UI_PERSIST_AUTHORIZATION=true
 
@@ -148,7 +147,7 @@ CACHE_STORE=database
 
 Notes utiles:
 
-- ajuste `CORS_ALLOWED_ORIGINS` selon l'URL du frontend
+- ajuste `CORS_ALLOWED_ORIGINS` selon l'URL du frontend, par exemple `https://yaaydoom.vercel.app`
 - ajuste `L5_SWAGGER_CONST_HOST` si l'API tourne sur un autre host ou port
 - `L5_SWAGGER_GENERATE_ALWAYS=true` force la regeneration de la spec Swagger a chaque execution
 
@@ -159,7 +158,7 @@ Les seeders ajoutent des comptes de demonstration directement utilisables.
 | Role | Email | Mot de passe |
 | --- | --- | --- |
 | Admin | `admin@demo.com` | `demo1234` |
-| Maman | `maman@demo.com` | `demo1234` |
+| Maman | `+221771234567` | `demo1234` |
 | Professionnel | `pro@demo.com` | `demo1234` |
 | Professionnel en attente | `pro.enattente@demo.com` | `demo1234` |
 
@@ -356,6 +355,8 @@ docker run -d \
 
 ### Avec Docker Compose
 
+Le projet utilise maintenant un seul fichier `docker-compose.yml`.
+
 ```bash
 docker compose up -d --build
 ```
@@ -363,8 +364,11 @@ docker compose up -d --build
 Notes:
 
 - `USE_MOCK_DATA=true` remplit automatiquement la base avec les donnees de demo au demarrage
+- `APP_PORT=8000` peut etre change si le port est deja utilise
 - `APP_URL` et `L5_SWAGGER_CONST_HOST` doivent correspondre a l'URL publique du service
 - si tu relies le backend a PostgreSQL, verifie que `DB_URL` pointe vers la bonne instance
+- par defaut, `docker-compose.yml` utilise aussi l'image Docker Hub `lingueredev/yaaydoom-backend:latest`
+- pour forcer l'image publiee sans rebuild local, utilise `DOCKER_IMAGE=lingueredev/yaaydoom-backend:latest docker compose up -d --no-build`
 
 ### Pousser sur Docker Hub
 
@@ -376,13 +380,106 @@ docker build -t lingueredev/yaaydoom-backend:latest .
 docker push lingueredev/yaaydoom-backend:latest
 ```
 
-### Lancer l'image publiee
+### Lancer le conteneur publie
 
-Le fichier `docker-compose.prod.yml` pointe deja vers l'image Docker Hub:
+Si tu veux lancer l'image Docker Hub sans rebuild local:
 
 ```bash
-docker compose -f docker-compose.prod.yml up -d
+DOCKER_IMAGE=lingueredev/yaaydoom-backend:latest docker compose up -d --no-build
 ```
+
+### Recuperer le JSON OpenAPI
+
+Si tu veux le JSON brut de la spec, utilise:
+
+```text
+/openapi.json
+```
+
+Il correspond au fichier `storage/api-docs/api-docs.json` genere par L5 Swagger.
+
+## Deploiement sur Render via une image Docker Hub
+
+Tu peux deployer ce backend sur Render en utilisant l'image publiee sur Docker Hub.
+
+### 1. Construire et pousser l'image
+
+Si tu es sur une machine x86_64 classique:
+
+```bash
+docker build -t lingueredev/yaaydoom-backend:latest .
+docker push lingueredev/yaaydoom-backend:latest
+```
+
+Si tu veux forcer une image compatible Render depuis n'importe quelle machine:
+
+```bash
+docker buildx build --platform linux/amd64 -t lingueredev/yaaydoom-backend:latest --push .
+```
+
+### 2. Créer le service Render
+
+1. Crée un nouveau `Web Service` sur Render.
+2. Choisis `Deploy an existing image`.
+3. Renseigne `lingueredev/yaaydoom-backend:latest`.
+4. Ne mets ni build command ni start command.
+5. Render fournira automatiquement `PORT`, et le conteneur l’utilise deja.
+
+### 3. Ajouter la base PostgreSQL
+
+1. Ajoute une base `PostgreSQL` Render au meme projet.
+2. Recupere sa `Connection String`.
+3. Renseigne-la dans le service web via `DB_URL`.
+
+### Variables d'environnement à configurer
+
+Dans le service web Render, ajoute au minimum:
+
+```env
+APP_NAME=YaayDoom
+APP_ENV=production
+APP_DEBUG=false
+APP_KEY=<generate on Render or paste a valid key>
+APP_URL=https://<ton-service>.onrender.com
+DB_CONNECTION=pgsql
+DB_URL=<connection string Render Postgres>
+DB_SSLMODE=require
+RUN_MIGRATIONS=true
+RUN_PASSPORT_SETUP=true
+CACHE_STORE=database
+QUEUE_CONNECTION=database
+SESSION_DRIVER=database
+L5_SWAGGER_GENERATE_ALWAYS=false
+L5_SWAGGER_CONST_HOST=https://<ton-service>.onrender.com
+LOG_LEVEL=info
+```
+
+### Variables utiles côté frontend
+
+Si ton frontend est séparé, ajoute aussi:
+
+```env
+CORS_ALLOWED_ORIGINS=https://<ton-frontend>.onrender.com
+```
+
+### Migration
+
+Pour ce projet, le conteneur peut lancer les migrations au démarrage si tu defines `RUN_MIGRATIONS=true`.
+Il peut aussi s'assurer que Passport est prêt via `RUN_PASSPORT_SETUP=true` ou automatiquement en `APP_ENV=production`.
+
+Si tu prefere le faire manuellement dans Render, lance:
+
+```bash
+php artisan migrate --force
+```
+
+### Points importants
+
+- le conteneur ecoute la variable `PORT` fournie par Render
+- la base de donnees doit venir de Render Postgres, pas de Neon externe
+- `APP_KEY` est obligatoire pour que l’application démarre correctement
+- `USE_MOCK_DATA` doit rester désactivé en production
+- si tu changes le domaine du service, mets aussi à jour `APP_URL` et `L5_SWAGGER_CONST_HOST`
 
 ## Licence
 

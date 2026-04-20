@@ -35,16 +35,6 @@ class AdminValidator
     /**
      * @return array<string, mixed>
      */
-    public static function role(array $data): array
-    {
-        return Validator::make($data, [
-            'role' => 'required|string|in:maman,professionnel,admin',
-        ])->validate();
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
     public static function status(array $data): array
     {
         return Validator::make($data, [

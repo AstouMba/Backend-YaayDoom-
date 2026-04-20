@@ -8,7 +8,7 @@ use Carbon\Carbon;
 class GrossessePresenter
 {
     /**
-     * Format contractuel exposé au frontend.
+     * Format Grossesse exposé au frontend.
      *
      * @return array<string, mixed>
      */
@@ -24,16 +24,16 @@ class GrossessePresenter
 
         return [
             'id' => $grossesse->id,
-            'maman_id' => $grossesse->maman_id,
-            'maman_nom' => $grossesse->maman?->name,
-            'date_debut' => optional($grossesse->date_debut)->format('Y-m-d'),
-            'date_fin_prevue' => optional($grossesse->date_fin_prevue)->format('Y-m-d'),
-            'semaine_grossesse' => $weeks,
-            'nombre_grossesses_precedentes' => (int) ($grossesse->nombre_grossesses_precedentes ?? 0),
-            'antecedents_medicaux' => $grossesse->antecedents_medicaux ?? '',
-            'statut' => $grossesse->statut,
-            'professionnel_validateur' => $grossesse->professionnel_validateur,
-            'date_validation' => optional($grossesse->date_validation)->format('Y-m-d'),
+            'mamanId' => $grossesse->maman_id,
+            'mamanNom' => $grossesse->maman?->name,
+            'dateDernieresRegles' => $grossesse->date_debut?->format('Y-m-d'),
+            'dateAccouchePrevue' => $grossesse->date_fin_prevue?->format('Y-m-d'),
+            'semaineGrossesse' => $weeks,
+            'nombreGrossessesPrecedentes' => (int) ($grossesse->nombre_grossesses_precedentes ?? 0),
+            'antecedentsMedicaux' => $grossesse->antecedents_medicaux ?? '',
+            'statut' => strtoupper($grossesse->statut ?? 'EN_ATTENTE'),
+            'professionnelValidateur' => $grossesse->professionnel_validateur,
+            'dateValidation' => $grossesse->date_validation?->format('Y-m-d'),
             'trimestre' => (int) ($grossesse->trimestre ?? $trimestre),
             'notes' => $grossesse->notes ?? '',
         ];

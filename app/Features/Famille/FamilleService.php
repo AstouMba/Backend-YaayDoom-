@@ -3,6 +3,7 @@
 namespace App\Features\Famille;
 
 use App\Application\Famille\GetFamily;
+use App\Models\User;
 use App\Services\Service;
 
 class FamilleService extends Service
@@ -16,9 +17,9 @@ class FamilleService extends Service
      *
      * @return array<string, mixed>|null
      */
-    public function get(string $mamanId): ?array
+    public function get(string $mamanId, ?User $user = null): ?array
     {
-        return $this->getFamily->execute($mamanId);
+        return $this->getFamily->execute($mamanId, $user);
     }
 
     /**
@@ -26,9 +27,9 @@ class FamilleService extends Service
      *
      * @return array<string, mixed>|null
      */
-    public function getMaman(string $mamanId): ?array
+    public function getMaman(string $mamanId, ?User $user = null): ?array
     {
-        return $this->getFamily->maman($mamanId);
+        return $this->getFamily->maman($mamanId, $user);
     }
 
     /**
@@ -36,8 +37,8 @@ class FamilleService extends Service
      *
      * @return array<string, mixed>|null
      */
-    public function getBebe(string $mamanId, string $bebeId): ?array
+    public function getBebe(string $mamanId, string $bebeId, ?User $user = null): ?array
     {
-        return $this->getFamily->bebe($mamanId, $bebeId);
+        return $this->getFamily->bebe($mamanId, $bebeId, $user);
     }
 }

@@ -17,7 +17,7 @@ class RendezVousController extends Controller
      */
     public function index(): JsonResponse
     {
-        $rendezVous = $this->rendezVousService->getAll();
+        $rendezVous = $this->rendezVousService->getAll(request()->user());
         return response()->json($rendezVous->map(function ($rendezVous) {
             $rendezVous->loadMissing('professionnel');
             return RendezVousPresenter::contract($rendezVous);
@@ -29,7 +29,7 @@ class RendezVousController extends Controller
      */
     public function show(string $id): JsonResponse
     {
-        $rendezVous = $this->rendezVousService->get($id);
+        $rendezVous = $this->rendezVousService->get($id, request()->user());
         $rendezVous->loadMissing('professionnel');
 
         return response()->json(RendezVousPresenter::contract($rendezVous));
@@ -40,7 +40,13 @@ class RendezVousController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
-        $rendezVous = $this->rendezVousService->create(RendezVousValidator::store($request->all()));
+        $data = RendezVousValidator::store($request->all());
+
+        if (request()->user()?->role === 'professionnel') {
+            $data['professionnel_id'] = request()->user()->id;
+        }
+
+        $rendezVous = $this->rendezVousService->create($data);
         $rendezVous->loadMissing('professionnel');
         return response()->json(RendezVousPresenter::contract($rendezVous), 201);
     }
@@ -50,7 +56,7 @@ class RendezVousController extends Controller
      */
     public function update(Request $request, string $id): JsonResponse
     {
-        $rendezVous = $this->rendezVousService->update($id, RendezVousValidator::update($request->all()));
+        $rendezVous = $this->rendezVousService->update($id, RendezVousValidator::update($request->all()), request()->user());
         $rendezVous->loadMissing('professionnel');
 
         return response()->json(RendezVousPresenter::contract($rendezVous));
@@ -61,7 +67,7 @@ class RendezVousController extends Controller
      */
     public function destroy(string $id): JsonResponse
     {
-        $this->rendezVousService->delete($id);
+        $this->rendezVousService->delete($id, request()->user());
 
         return response()->json(['message' => 'Rendez-vous deleted successfully']);
     }

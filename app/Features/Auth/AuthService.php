@@ -8,6 +8,7 @@ use App\Application\Auth\DTO\LoginData;
 use App\Application\Auth\DTO\RegisterData;
 use App\Application\Auth\DTO\UpdateProfileData;
 use App\Application\Auth\GetCurrentUser;
+use App\Application\Auth\IssuePassportToken;
 use App\Application\Auth\LoginUser;
 use App\Application\Auth\LogoutUser;
 use App\Application\Auth\RegisterUser;
@@ -23,6 +24,7 @@ class AuthService extends Service
         private LoginUser $loginUser,
         private LogoutUser $logoutUser,
         private GetCurrentUser $getCurrentUser,
+        private IssuePassportToken $issuePassportToken,
         private UpdateProfile $updateProfile,
         private ChangePassword $changePasswordUseCase,
         private UploadProfessionalDocuments $uploadProfessionalDocumentsUseCase,
@@ -34,6 +36,14 @@ class AuthService extends Service
     public function register(array $data): User
     {
         return $this->registerUser->execute(RegisterData::fromArray($data));
+    }
+
+    /**
+     * Générer un token Passport robuste, même si le client personnel manque.
+     */
+    public function issueToken(User $user, string $tokenName = 'auth_token'): string
+    {
+        return $this->issuePassportToken->execute($user, $tokenName);
     }
 
     /**

@@ -37,37 +37,16 @@ class FrontMockSeeder extends Seeder
     {
         $users = [];
 
-        $users['maman_aminata'] = $this->seedUser([
-            'email' => 'maman@demo.com',
-            'name' => 'Aminata Diallo',
-            'phone' => '+221 77 123 45 67',
-            'role' => 'maman',
-            'status' => 'actif',
-            'is_validated' => true,
-            'dateInscription' => '2024-09-01',
-        ]);
+        $users['professionnel_valide'] = User::where('email', 'pro@demo.com')
+            ->firstOrFail();
 
         $users['maman_fatou'] = $this->seedUser([
-            'email' => 'fatou.sall@demo.com',
             'name' => 'Fatou Sall',
             'phone' => '+221 76 234 56 78',
             'role' => 'maman',
             'status' => 'actif',
             'is_validated' => true,
             'dateInscription' => '2024-10-15',
-        ]);
-
-        $users['professionnel_valide'] = $this->seedUser([
-            'email' => 'pro@demo.com',
-            'name' => 'Dr. Fatou Sow',
-            'phone' => '+221 76 234 56 79',
-            'role' => 'professionnel',
-            'status' => 'actif',
-            'is_validated' => true,
-            'specialite' => 'Gynécologue',
-            'matricule' => 'GYN-2024-001',
-            'centre_de_sante' => 'Hôpital Principal de Dakar',
-            'dateInscription' => '2024-08-15',
         ]);
 
         $users['admin'] = $this->seedUser([
@@ -133,19 +112,6 @@ class FrontMockSeeder extends Seeder
     {
         $grossesses = [];
 
-        $grossesses['grossesse_aminata'] = $this->seedGrossesse([
-            'maman_id' => $users['maman_aminata']->id,
-            'date_debut' => '2024-09-10',
-            'date_fin_prevue' => '2025-06-17',
-            'nombre_grossesses_precedentes' => 1,
-            'antecedents_medicaux' => 'Légère anémie en fin de grossesse précédente.',
-            'professionnel_validateur' => $users['professionnel_valide']->id,
-            'date_validation' => '2024-09-20',
-            'trimestre' => 2,
-            'statut' => 'validee',
-            'notes' => 'Grossesse validée pour le suivi prénatal.',
-        ]);
-
         $grossesses['grossesse_fatou'] = $this->seedGrossesse([
             'maman_id' => $users['maman_fatou']->id,
             'date_debut' => '2025-01-05',
@@ -171,32 +137,18 @@ class FrontMockSeeder extends Seeder
     {
         $bebes = [];
 
-        $bebes['bebe_aminata'] = $this->seedBebe([
-            'maman_id' => $users['maman_aminata']->id,
-            'grossesse_id' => $grossesses['grossesse_aminata']->id,
-            'nom' => 'Aminata Jr Diallo',
+        $bebes['bebe_moussa'] = $this->seedBebe([
+            'maman_id' => $users['maman_fatou']->id,
+            'grossesse_id' => $grossesses['grossesse_fatou']->id,
+            'nom' => 'Moussa Sall',
             'date_naissance' => '2024-03-15',
-            'sexe' => 'F',
+            'sexe' => 'M',
             'poids' => 3.2,
             'poids_actuel' => 9.1,
             'taille' => 49,
             'taille_actuelle' => 74,
             'groupe_sanguin' => 'O+',
             'notes' => 'Suivi de croissance conforme.',
-        ]);
-
-        $bebes['bebe_moussa'] = $this->seedBebe([
-            'maman_id' => $users['maman_fatou']->id,
-            'grossesse_id' => $grossesses['grossesse_fatou']->id,
-            'nom' => 'Moussa Sall',
-            'date_naissance' => '2024-07-20',
-            'sexe' => 'M',
-            'poids' => 2.8,
-            'poids_actuel' => 7.2,
-            'taille' => 46,
-            'taille_actuelle' => 68,
-            'groupe_sanguin' => 'A+',
-            'notes' => 'Jumeau, suivi pédiatrique régulier.',
         ]);
 
         $bebes['bebe_mariama'] = $this->seedBebe([
@@ -209,7 +161,7 @@ class FrontMockSeeder extends Seeder
             'poids_actuel' => 6.8,
             'taille' => 45,
             'taille_actuelle' => 66,
-            'groupe_sanguin' => 'O+',
+            'groupe_sanguin' => 'A+',
             'notes' => 'Jumelle, suivi nutritionnel renforcé.',
         ]);
 
@@ -221,14 +173,6 @@ class FrontMockSeeder extends Seeder
      */
     private function seedCartes(array $users): void
     {
-        $this->seedCarte([
-            'maman_id' => $users['maman_aminata']->id,
-            'numero_carte' => 'CARTE-2024-0001',
-            'date_emission' => '2024-09-01',
-            'date_expiration' => '2026-09-01',
-            'statut' => 'active',
-        ]);
-
         $this->seedCarte([
             'maman_id' => $users['maman_fatou']->id,
             'numero_carte' => 'CARTE-2025-0002',
@@ -244,7 +188,7 @@ class FrontMockSeeder extends Seeder
     private function seedConsultations(array $users): void
     {
         $this->seedConsultation([
-            'maman_id' => $users['maman_aminata']->id,
+            'maman_id' => $users['maman_fatou']->id,
             'professionnel_id' => $users['professionnel_valide']->id,
             'date' => '2025-04-05',
             'heure' => '09:30:00',
@@ -258,7 +202,7 @@ class FrontMockSeeder extends Seeder
         ]);
 
         $this->seedConsultation([
-            'maman_id' => $users['maman_aminata']->id,
+            'maman_id' => $users['maman_fatou']->id,
             'professionnel_id' => $users['professionnel_valide']->id,
             'date' => '2025-04-20',
             'heure' => '14:00:00',
@@ -293,8 +237,8 @@ class FrontMockSeeder extends Seeder
     private function seedRendezVous(array $users, array $grossesses): void
     {
         $this->seedRendezVousRecord([
-            'grossesse_id' => $grossesses['grossesse_aminata']->id,
-            'maman_id' => $users['maman_aminata']->id,
+            'grossesse_id' => $grossesses['grossesse_fatou']->id,
+            'maman_id' => $users['maman_fatou']->id,
             'professionnel_id' => $users['professionnel_valide']->id,
             'date' => '2025-04-05',
             'heure' => '09:30:00',
@@ -306,8 +250,8 @@ class FrontMockSeeder extends Seeder
         ]);
 
         $this->seedRendezVousRecord([
-            'grossesse_id' => $grossesses['grossesse_aminata']->id,
-            'maman_id' => $users['maman_aminata']->id,
+            'grossesse_id' => $grossesses['grossesse_fatou']->id,
+            'maman_id' => $users['maman_fatou']->id,
             'professionnel_id' => $users['professionnel_valide']->id,
             'date' => '2025-04-20',
             'heure' => '14:00:00',
@@ -326,7 +270,7 @@ class FrontMockSeeder extends Seeder
     private function seedVaccinations(array $users, array $bebes): void
     {
         $pro = $users['professionnel_valide'];
-        $bebe = $bebes['bebe_aminata'];
+        $bebe = $bebes['bebe_moussa'];
 
         $this->seedVaccination([
             'bebe_id' => $bebe->id,
@@ -466,10 +410,21 @@ class FrontMockSeeder extends Seeder
      */
     private function seedUser(array $data): User
     {
+        $lookup = [];
+
+        if (! empty($data['email'])) {
+            $lookup['email'] = $data['email'];
+        } elseif (! empty($data['phone'])) {
+            $lookup['phone'] = $data['phone'];
+        } else {
+            $lookup['name'] = $data['name'];
+        }
+
         $user = User::updateOrCreate(
-            ['email' => $data['email']],
+            $lookup,
             [
                 'name' => $data['name'],
+                'email' => $data['email'] ?? null,
                 'phone' => $data['phone'],
                 'password' => Hash::make('demo1234'),
                 'role' => $data['role'],

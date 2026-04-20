@@ -15,56 +15,6 @@ class AdminController extends Controller
     ) {}
 
     /**
-     * Liste tous les administrateurs
-     */
-    public function index(): JsonResponse
-    {
-        $admins = $this->adminService->getAll();
-
-        return response()->json($admins->map(fn (User $admin) => UserPresenter::admin($admin))->values());
-    }
-
-    /**
-     * Affiche un administrateur spécifique
-     */
-    public function show(string $id): JsonResponse
-    {
-        $admin = $this->adminService->get($id);
-
-        return response()->json(UserPresenter::admin($admin));
-    }
-
-    /**
-     * Crée un nouvel administrateur
-     */
-    public function store(Request $request): JsonResponse
-    {
-        $admin = $this->adminService->create(AdminValidator::store($request->all()));
-
-        return response()->json(UserPresenter::admin($admin), 201);
-    }
-
-    /**
-     * Met à jour un administrateur
-     */
-    public function update(Request $request, string $id): JsonResponse
-    {
-        $admin = $this->adminService->update($id, AdminValidator::update($request->all(), $id));
-
-        return response()->json(UserPresenter::admin($admin));
-    }
-
-    /**
-     * Supprime un administrateur
-     */
-    public function destroy(string $id): JsonResponse
-    {
-        $this->adminService->delete($id);
-
-        return response()->json(['message' => 'Admin deleted successfully']);
-    }
-
-    /**
      * Liste des utilisateurs (écran admin)
      */
     public function users(Request $request): JsonResponse
@@ -133,19 +83,6 @@ class AdminController extends Controller
     }
 
     /**
-     * Changer le rôle d'un utilisateur
-     */
-    public function updateUserRole(Request $request, User $user): JsonResponse
-    {
-        $validated = AdminValidator::role($request->all());
-        $updated = $this->adminService->updateRole($user, $validated['role']);
-
-        return response()->json([
-            'success' => true,
-        ]);
-    }
-
-    /**
      * Changer le statut d'un utilisateur
      */
     public function updateUserStatus(Request $request, User $user): JsonResponse
@@ -155,6 +92,7 @@ class AdminController extends Controller
 
         return response()->json([
             'success' => true,
+            'user' => UserPresenter::admin($updated),
         ]);
     }
 }

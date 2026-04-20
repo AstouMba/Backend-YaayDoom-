@@ -4,13 +4,22 @@ namespace App\Application\Vaccination;
 
 use App\Application\Vaccination\DTO\UpdateVaccinationData;
 use App\Models\Vaccination;
+use App\Models\User;
 use App\Services\Service;
 
 class UpdateVaccination extends Service
 {
-    public function execute(string $id, UpdateVaccinationData $data): Vaccination
+    public function execute(string $id, UpdateVaccinationData $data, ?User $user = null): Vaccination
     {
-        $vaccination = Vaccination::find($id);
+        $query = Vaccination::query();
+
+        if ($user?->role === 'maman') {
+            $query->whereHas('bebe', function ($bebeQuery) use ($user): void {
+                $bebeQuery->where('maman_id', $user->id);
+            });
+        }
+
+        $vaccination = $query->find($id);
 
         if (!$vaccination) {
             $this->notFound('vaccination_not_found');

@@ -11,9 +11,9 @@ class RegisterUser extends Service
 {
     public function execute(RegisterData $data): User
     {
-        return User::create([
+        $userData = [
             'name' => $data->name,
-            'email' => $data->email,
+            'email' => $data->role === 'professionnel' ? $data->email : null,
             'phone' => $data->phone,
             'birth_date' => $data->birthDate,
             'password' => Hash::make($data->password),
@@ -24,6 +24,8 @@ class RegisterUser extends Service
             'matricule' => $data->matricule,
             'centre_de_sante' => $data->centreDeSante,
             'rejection_reason' => null,
-        ]);
+        ];
+
+        return User::create($userData);
     }
 }

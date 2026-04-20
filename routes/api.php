@@ -35,14 +35,13 @@ Route::middleware('auth:api')->group(function (): void {
     Route::post('auth/professional/documents', [AuthController::class, 'uploadProfessionalDocuments'])
         ->middleware('role:professionnel');
 
-    // Admin (aligné avec le front)
+    // Admin (réservé admin)
     Route::prefix('admin')->middleware('role:admin')->group(function (): void {
         Route::get('users', [AdminController::class, 'users']);
         Route::get('stats', [AdminController::class, 'stats']);
         Route::get('professionnels/pending', [AdminController::class, 'pendingProfessionnels']);
         Route::post('professionnels/{user}/approve', [AdminController::class, 'approveProfessionnel']);
         Route::post('professionnels/{user}/reject', [AdminController::class, 'rejectProfessionnel']);
-        Route::patch('users/{user}/role', [AdminController::class, 'updateUserRole']);
         Route::patch('users/{user}/status', [AdminController::class, 'updateUserStatus']);
     });
 
@@ -53,32 +52,39 @@ Route::middleware('auth:api')->group(function (): void {
         Route::delete('users/{user}', [UserController::class, 'destroy']);
     });
 
-    // Métier (authentifié)
-    Route::get('consultations', [ConsultationController::class, 'index']);
-    Route::get('consultations/{consultation}', [ConsultationController::class, 'show']);
-    Route::post('consultations', [ConsultationController::class, 'store']);
-    Route::patch('consultations/{consultation}', [ConsultationController::class, 'update']);
-
+    // Grossesses
     Route::get('grossesses', [GrossesseController::class, 'index']);
     Route::get('grossesses/{grossesse}', [GrossesseController::class, 'show']);
     Route::post('grossesses', [GrossesseController::class, 'store']);
-    Route::put('grossesses/{grossesse}', [GrossesseController::class, 'update']);
-    Route::patch('grossesses/{grossesse}', [GrossesseController::class, 'update']);
+    Route::match(['post', 'patch', 'put'], 'grossesses/{grossesse}/validate', [GrossesseController::class, 'validateGrossesse'])
+        ->middleware('role:professionnel');
+    Route::patch('grossesses/{grossesse}', [GrossesseController::class, 'update'])
+        ->middleware('role:professionnel,admin');
 
+    // Bebes
     Route::get('bebes', [BebeController::class, 'index']);
     Route::get('bebes/{bebe}', [BebeController::class, 'show']);
     Route::post('bebes', [BebeController::class, 'store']);
 
+    // Consultations
+    Route::get('consultations', [ConsultationController::class, 'index']);
+    Route::get('consultations/{consultation}', [ConsultationController::class, 'show']);
+    Route::post('consultations', [ConsultationController::class, 'store']);
+
+    // Vaccinations
     Route::get('vaccinations', [VaccinationController::class, 'index']);
     Route::get('vaccinations/{vaccination}', [VaccinationController::class, 'show']);
     Route::post('vaccinations', [VaccinationController::class, 'store']);
-    Route::patch('vaccinations/{vaccination}', [VaccinationController::class, 'update']);
 
+    // Rendez-vous
     Route::get('rendez-vous', [RendezVousController::class, 'index']);
+    Route::get('rendez-vous/{rendez_vous}', [RendezVousController::class, 'show']);
     Route::post('rendez-vous', [RendezVousController::class, 'store']);
 
+    // Scans
     Route::post('scans/resolve', [ScanController::class, 'resolve']);
 
+    // Famille
     Route::get('familles/{uuid}', [FamilleController::class, 'show']);
     Route::get('familles/{uuid}/maman', [FamilleController::class, 'maman']);
     Route::get('familles/{uuid}/bebes/{bebeUuid}', [FamilleController::class, 'bebe']);

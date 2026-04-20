@@ -10,6 +10,7 @@ use App\Application\Consultation\GetConsultation;
 use App\Application\Consultation\ListConsultations;
 use App\Application\Consultation\UpdateConsultation;
 use App\Models\Consultation;
+use App\Models\User;
 use App\Services\Service;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -26,17 +27,17 @@ class ConsultationService extends Service
     /**
      * Récupérer toutes les consultations
      */
-    public function getAll(): Collection
+    public function getAll(?User $user = null): Collection
     {
-        return $this->listConsultations->execute();
+        return $this->listConsultations->execute($user);
     }
 
     /**
      * Récupérer une consultation par ID
      */
-    public function get(string $id): ?Consultation
+    public function get(string $id, ?User $user = null): ?Consultation
     {
-        return $this->getConsultation->execute($id);
+        return $this->getConsultation->execute($id, $user);
     }
 
     /**
@@ -50,16 +51,16 @@ class ConsultationService extends Service
     /**
      * Mettre à jour une consultation
      */
-    public function update(string $id, array $data): ?Consultation
+    public function update(string $id, array $data, ?User $user = null): ?Consultation
     {
-        return $this->updateConsultation->execute($id, UpdateConsultationData::fromArray($data));
+        return $this->updateConsultation->execute($id, UpdateConsultationData::fromArray($data), $user);
     }
 
     /**
      * Supprimer une consultation
      */
-    public function delete(string $id): bool
+    public function delete(string $id, ?User $user = null): bool
     {
-        return $this->deleteConsultation->execute($id);
+        return $this->deleteConsultation->execute($id, $user);
     }
 }

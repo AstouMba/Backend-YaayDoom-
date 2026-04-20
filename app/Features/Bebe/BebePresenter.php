@@ -8,13 +8,18 @@ use Carbon\Carbon;
 class BebePresenter
 {
     /**
-     * Format contractuel exposé au frontend.
+     * Format Bebe exposé au frontend.
      *
      * @return array<string, mixed>
      */
     public static function contract(Bebe $bebe): array
     {
         $ageActuel = null;
+        $sexeFormat = match ($bebe->sexe) {
+            'M', 'm', 'masculin', 'Masculin', 'Garcon', 'garcon' => 'Masculin',
+            'F', 'f', 'feminin', 'Feminin', 'Fille', 'fille' => 'Féminin',
+            default => 'Inconnu',
+        };
 
         if ($bebe->date_naissance) {
             $months = Carbon::parse($bebe->date_naissance)->diffInMonths(Carbon::now());
@@ -23,17 +28,18 @@ class BebePresenter
 
         return [
             'id' => $bebe->id,
-            'grossesse_id' => $bebe->grossesse_id,
-            'maman_id' => $bebe->maman_id,
+            'grossesseId' => $bebe->grossesse_id,
+            'mamanId' => $bebe->maman_id,
             'nom' => $bebe->nom,
-            'date_naissance' => optional($bebe->date_naissance)->format('Y-m-d'),
-            'sexe' => $bebe->sexe,
-            'poids' => $bebe->poids,
-            'taille' => $bebe->taille,
-            'groupe_sanguin' => $bebe->groupe_sanguin,
-            'poids_actuel' => $bebe->poids_actuel ?? $bebe->poids,
-            'taille_actuelle' => $bebe->taille_actuelle ?? $bebe->taille,
-            'age_actuel' => $ageActuel,
+            'dateNaissance' => $bebe->date_naissance?->format('Y-m-d'),
+            'sexe' => $sexeFormat,
+            'poidsNaissance' => (float) $bebe->poids,
+            'tailleNaissance' => (float) $bebe->taille,
+            'groupeSanguin' => $bebe->groupe_sanguin,
+            'ageActuel' => $ageActuel,
+            'poidsActuel' => (float) ($bebe->poids_actuel ?? $bebe->poids),
+            'tailleActuelle' => (float) ($bebe->taille_actuelle ?? $bebe->taille),
+            'mamanNom' => $bebe->maman?->name,
         ];
     }
 }

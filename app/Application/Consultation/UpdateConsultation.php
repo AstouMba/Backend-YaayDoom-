@@ -4,13 +4,20 @@ namespace App\Application\Consultation;
 
 use App\Application\Consultation\DTO\UpdateConsultationData;
 use App\Models\Consultation;
+use App\Models\User;
 use App\Services\Service;
 
 class UpdateConsultation extends Service
 {
-    public function execute(string $id, UpdateConsultationData $data): Consultation
+    public function execute(string $id, UpdateConsultationData $data, ?User $user = null): Consultation
     {
-        $consultation = Consultation::find($id);
+        $query = Consultation::query();
+
+        if ($user?->role === 'maman') {
+            $query->where('maman_id', $user->id);
+        }
+
+        $consultation = $query->find($id);
 
         if (!$consultation) {
             $this->notFound('consultation_not_found');
